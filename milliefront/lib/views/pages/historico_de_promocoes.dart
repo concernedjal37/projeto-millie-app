@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:milliefront/views/pages/home_page.dart';
+import 'package:milliefront/views/pages/perfil.dart';
 
 class HistoricoDePromocoes extends StatefulWidget {
   const HistoricoDePromocoes({super.key});
@@ -24,7 +24,19 @@ class _HistoricoDePromocoesState extends State<StatefulWidget> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                
+                Row(
+                  children: [
+                    BackButton(onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Perfil()));
+                      },
+                    ),
+                    Text('Histórico de promoções',
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                    )
+                  ],
+                ),
               ],
             ),
           ),

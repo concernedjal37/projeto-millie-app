@@ -21,9 +21,22 @@ class _ConfiguracoesState extends State<StatefulWidget> {
               borderRadius: BorderRadius.circular(25.0),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
+                Row(
+                  children: [
+                    BackButton(onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                      },
+                    ),
+                    Text('Configurações',
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                    )
+                  ],
+                ),
               ],
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:milliefront/views/pages/configuracoes.dart';
 import 'package:milliefront/views/pages/historico_de_promocoes.dart';
 import 'package:milliefront/views/pages/home_page.dart';
 import 'package:milliefront/views/pages/notificacoes.dart';
@@ -43,7 +44,7 @@ class _PerfilState extends State<StatefulWidget> {
                                 },
                                 child: Text("Home")),
                                 ElevatedButton(onPressed: () {
-                              
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => Configuracoes()));
                                 }, child: Text("Configurações")),
                               ],
                             ),

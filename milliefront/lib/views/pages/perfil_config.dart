@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:milliefront/views/pages/home_page.dart';
+import 'package:milliefront/views/pages/perfil.dart';
 
 class PerfilConfig extends StatefulWidget{
   const PerfilConfig({super.key});
@@ -23,7 +23,19 @@ class _PerfilConfigState extends State<StatefulWidget> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                
+                Row(
+                  children: [
+                    BackButton(onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Perfil()));
+                      },
+                    ),
+                    Text('Perfil',
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                    )
+                  ],
+                ),
               ],
             ),
           ),
