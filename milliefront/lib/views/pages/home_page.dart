@@ -100,7 +100,7 @@ class _HomePageState extends State<StatefulWidget> {
                         child: Text("Perfil")),
                         ElevatedButton(onPressed: () {
                           Navigator.push(context, MaterialPageRoute(builder: (context) => Configuracoes()));
-                        }, child: Text("Configurações")),
+                        }, child: Text("Configurações extras")),
                       ],
                     ),
                     Row(
@@ -113,7 +113,7 @@ class _HomePageState extends State<StatefulWidget> {
                           fontSize: 20,
                         ),
                         ),
-                        Text("Configurações",
+                        Text("Configurações extras",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,

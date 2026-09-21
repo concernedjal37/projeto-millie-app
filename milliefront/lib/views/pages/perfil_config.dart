@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:milliefront/views/pages/login.dart';
 import 'package:milliefront/views/pages/perfil.dart';
 
 class PerfilConfig extends StatefulWidget {
@@ -24,6 +25,7 @@ class _PerfilConfigState extends State<StatefulWidget> {
               color: Color(0xffffffff),
               borderRadius: BorderRadius.circular(25.0),
             ),
+            padding: EdgeInsets.all(10.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,33 +44,31 @@ class _PerfilConfigState extends State<StatefulWidget> {
                   ],
                 ),
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SwitchListTile.adaptive(
-                      title: Text('Switch 1'),
-                      value: switch1,
-                      onChanged: (bool value) {
-                        setState(() {
-                          switch1 = value;
-                        });
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: ElevatedButton(onPressed: () {
+                        
                       },
+                      child: Text('Trocar de nome')),
                     ),
-                    SwitchListTile.adaptive(
-                      title: Text('Switch 2'),
-                      value: switch2,
-                      onChanged: (bool value) {
-                        setState(() {
-                          switch2 = value;
-                        });
-                      },
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: ElevatedButton(onPressed: () {
+                        
+                      }, child: Text('Trocar a foto de perfil')),
                     ),
-                    SwitchListTile.adaptive(
-                      title: Text('Switch 3'),
-                      value: switch3,
-                      onChanged: (bool value) {
-                        setState(() {
-                          switch3 = value;
-                        });
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: ElevatedButton(onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xffff5050),
+                        foregroundColor: Color(0xffeeeeee),
+                      ),
+                      child: Text('Sair da conta')),
                     ),
                   ],
                 ),

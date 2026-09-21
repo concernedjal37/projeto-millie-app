@@ -24,6 +24,7 @@ class _HistoricoDePromocoesState extends State<StatefulWidget> {
               color: Color(0xffffffff),
               borderRadius: BorderRadius.circular(25.0),
             ),
+            padding: EdgeInsets.all(10.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,40 +39,24 @@ class _HistoricoDePromocoesState extends State<StatefulWidget> {
                         );
                       },
                     ),
-                    Text(
-                      'Histórico de promoções',
-                      style: TextStyle(fontSize: 18),
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Text(
+                        'Histórico de promoções',
+                        style: TextStyle(fontSize: 18),
+                      ),
                     ),
                   ],
                 ),
                 Column(
                   children: [
-                    SwitchListTile.adaptive(
-                      title: Text('Switch 1'),
-                      value: switch1,
-                      onChanged: (bool value) {
-                        setState(() {
-                          switch1 = value;
-                        });
-                      },
-                    ),
-                    SwitchListTile.adaptive(
-                      title: Text('Switch 2'),
-                      value: switch2,
-                      onChanged: (bool value) {
-                        setState(() {
-                          switch2 = value;
-                        });
-                      },
-                    ),
-                    SwitchListTile.adaptive(
-                      title: Text('Switch 3'),
-                      value: switch3,
-                      onChanged: (bool value) {
-                        setState(() {
-                          switch3 = value;
-                        });
-                      },
+                    SizedBox(
+                      child: Text('Não há nada aqui por enquanto pois isso é só um prototipo',
+                      style: TextStyle(
+                        fontSize: 25.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      ),
                     ),
                   ],
                 ),

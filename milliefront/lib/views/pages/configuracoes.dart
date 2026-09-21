@@ -24,6 +24,7 @@ class _ConfiguracoesState extends State<StatefulWidget> {
               color: Color(0xffffffff),
               borderRadius: BorderRadius.circular(25.0),
             ),
+            padding: EdgeInsets.all(10.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,19 +44,22 @@ class _ConfiguracoesState extends State<StatefulWidget> {
                 ),
                 Column(
                   children: [
-                    SwitchListTile.adaptive(
-                      title: Text('Modo escuro',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: SwitchListTile.adaptive(
+                        title: Text('Modo escuro',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        ),
+                        value: switch1,
+                        onChanged: (bool value) {
+                          setState(() {
+                            switch1 = value;
+                          });
+                        },
                       ),
-                      ),
-                      value: switch1,
-                      onChanged: (bool value) {
-                        setState(() {
-                          switch1 = value;
-                        });
-                      },
                     ),
                   ],
                 ),
