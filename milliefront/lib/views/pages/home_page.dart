@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:milliefront/views/pages/configuracoes.dart';
 import 'package:milliefront/views/pages/login.dart';
 import 'package:milliefront/views/pages/perfil.dart';
 import 'package:milliefront/views/pages/promocao_e_cotacao.dart';
@@ -93,7 +94,7 @@ class HomePage extends StatelessWidget {
                         },
                         child: Text("Perfil")),
                         ElevatedButton(onPressed: () {
-
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => Configuracoes()));
                         }, child: Text("Configurações")),
                       ],
                     ),

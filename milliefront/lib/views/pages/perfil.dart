@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:milliefront/views/pages/historico_de_promocoes.dart';
 import 'package:milliefront/views/pages/home_page.dart';
+import 'package:milliefront/views/pages/notificacoes.dart';
+import 'package:milliefront/views/pages/perfil_config.dart';
 
 class Perfil extends StatefulWidget {
   const Perfil({super.key});
@@ -98,7 +101,7 @@ class _PerfilState extends State<StatefulWidget> {
                           children: [
                             Icon(Icons.settings, color: Colors.white,),
                             ElevatedButton(onPressed: () {
-                          
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => PerfilConfig()));
                             },
                             child: Text("Perfil")),
                           ],
@@ -108,7 +111,7 @@ class _PerfilState extends State<StatefulWidget> {
                           children: [
                             Icon(Icons.settings, color: Colors.white,),
                             ElevatedButton(onPressed: () {
-                          
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => Notificacoes()));
                             },
                             child: Text("Notificações")),
                           ],
@@ -118,7 +121,7 @@ class _PerfilState extends State<StatefulWidget> {
                           children: [
                             Icon(Icons.settings, color: Colors.white,),
                             ElevatedButton(onPressed: () {
-                          
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => HistoricoDePromocoes()));
                             },
                             child: Text("Histórico de Promoções")),
                           ],
