@@ -25,7 +25,8 @@ class _PerfilConfigState extends State<StatefulWidget> {
               borderRadius: BorderRadius.circular(25.0),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
