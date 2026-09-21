@@ -44,29 +44,16 @@ class _ConfiguracoesState extends State<StatefulWidget> {
                 Column(
                   children: [
                     SwitchListTile.adaptive(
-                      title: Text('Switch 1'),
+                      title: Text('Modo escuro',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      ),
                       value: switch1,
                       onChanged: (bool value) {
                         setState(() {
                           switch1 = value;
-                        });
-                      },
-                    ),
-                    SwitchListTile.adaptive(
-                      title: Text('Switch 2'),
-                      value: switch2,
-                      onChanged: (bool value) {
-                        setState(() {
-                          switch2 = value;
-                        });
-                      },
-                    ),
-                    SwitchListTile.adaptive(
-                      title: Text('Switch 3'),
-                      value: switch3,
-                      onChanged: (bool value) {
-                        setState(() {
-                          switch3 = value;
                         });
                       },
                     ),

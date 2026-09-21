@@ -44,7 +44,12 @@ class _NotificacoesState extends State<StatefulWidget> {
                 Column(
                   children: [
                     SwitchListTile.adaptive(
-                      title: Text('Switch 1'),
+                      title: Text('Notificações de recomendações de voos',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      ),
                       value: switch1,
                       onChanged: (bool value) {
                         setState(() {
@@ -53,20 +58,16 @@ class _NotificacoesState extends State<StatefulWidget> {
                       },
                     ),
                     SwitchListTile.adaptive(
-                      title: Text('Switch 2'),
+                      title: Text('Notificações de recomendações de promoções e cotações',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      ),
                       value: switch2,
                       onChanged: (bool value) {
                         setState(() {
                           switch2 = value;
-                        });
-                      },
-                    ),
-                    SwitchListTile.adaptive(
-                      title: Text('Switch 3'),
-                      value: switch3,
-                      onChanged: (bool value) {
-                        setState(() {
-                          switch3 = value;
                         });
                       },
                     ),

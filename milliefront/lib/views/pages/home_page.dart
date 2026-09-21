@@ -5,8 +5,13 @@ import 'package:milliefront/views/pages/perfil.dart';
 import 'package:milliefront/views/pages/promocao_e_cotacao.dart';
 import 'package:milliefront/views/pages/voos.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<StatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
