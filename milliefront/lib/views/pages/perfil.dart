@@ -87,11 +87,14 @@ class _PerfilState extends State<StatefulWidget> {
                           ],
                         ),
                         SizedBox(
-                          height: 200,
-                          width: 200,
-                          child: Image.asset(
-                            'assets/images/OIP.png',
-                            fit: BoxFit.cover,
+                          child: Card(
+                            color: Color.fromARGB(255, 50, 50, 240),
+                            child: CircleAvatar(
+                              radius: 100,
+                              backgroundImage: AssetImage(
+                                'assets/images/OIP.png',
+                              ),
+                            ),
                           ),
                         ),
                         Text(

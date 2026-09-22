@@ -67,6 +67,7 @@ class _VoosState extends State<StatefulWidget> {
                               ),
                             ),
                           ),
+                          
                           TextField(
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
@@ -91,6 +92,32 @@ class _VoosState extends State<StatefulWidget> {
                         child: Container(
                           color: Color(0xff303070),
                           width: double.infinity,
+                          child: ListView(
+                            scrollDirection: Axis.vertical,
+                            children: [
+                              Card(
+                                elevation: 5,
+                                child: ListTile(
+                                  title: Text("Voo 1"),
+                                  subtitle: Text("Detalhes do voo 1"),
+                                ),
+                              ),
+                              Card(
+                                elevation: 5,
+                                child: ListTile(
+                                  title: Text("Voo 2"),
+                                  subtitle: Text("Detalhes do voo 2"),
+                                ),
+                              ),
+                              Card(
+                                elevation: 5,
+                                child: ListTile(
+                                  title: Text("Voo 3"),
+                                  subtitle: Text("Detalhes do voo 3"),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
