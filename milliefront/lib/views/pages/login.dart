@@ -15,7 +15,7 @@ class _LoginState extends State<StatefulWidget> {
     return Scaffold(
       body: Center(
         child: Container(
-          color: Color(0xff303070),
+          color: Color.fromARGB(255, 30, 30, 130),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,

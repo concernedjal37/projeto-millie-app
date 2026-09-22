@@ -17,7 +17,7 @@ class _PerfilConfigState extends State<StatefulWidget> {
     return Scaffold(
       body: Center(
         child: Container(
-          color: Color(0xff303070),
+          color: Color.fromARGB(255, 30, 30, 130),
           width: double.infinity,
           padding: EdgeInsets.all(50.0),
           child: Container(

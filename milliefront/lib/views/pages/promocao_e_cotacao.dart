@@ -13,14 +13,14 @@ class _PromocaoECotacaoState extends State<StatefulWidget> {
     return Scaffold(
       body: Center(
         child: Container(
-          color: Color(0xff303070),
+          color: Color.fromARGB(255, 25, 25, 80),
           width: double.infinity,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(
                 child: Container(
-                  color: Color.fromARGB(255, 95, 95, 207),
+                  color: Color.fromARGB(255, 50, 50, 240),
                   child: Column(
                     children: [
                       ElevatedButton(onPressed: () {

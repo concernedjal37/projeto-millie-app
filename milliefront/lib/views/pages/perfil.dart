@@ -11,10 +11,11 @@ class Perfil extends StatefulWidget {
   // ignore: library_private_types_in_public_api
   _PerfilState createState() => _PerfilState();
 }
+
 class _PerfilState extends State<StatefulWidget> {
   var _nomeUsuario = "Arthur";
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: Container(
@@ -28,7 +29,7 @@ class _PerfilState extends State<StatefulWidget> {
                   heightFactor: 1,
                   widthFactor: 1,
                   child: Container(
-                    color: Color.fromARGB(255, 95, 95, 207),
+                    color: Color.fromARGB(255, 50, 50, 240),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -39,30 +40,47 @@ class _PerfilState extends State<StatefulWidget> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               mainAxisSize: MainAxisSize.max,
                               children: [
-                                ElevatedButton(onPressed: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
-                                },
-                                child: Text("Home")),
-                                ElevatedButton(onPressed: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => Configuracoes()));
-                                }, child: Text("Configurações extras")),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => HomePage(),
+                                      ),
+                                    );
+                                  },
+                                  child: Text("Home"),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => Configuracoes(),
+                                      ),
+                                    );
+                                  },
+                                  child: Text("Configurações extras"),
+                                ),
                               ],
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               mainAxisSize: MainAxisSize.max,
                               children: [
-                                Text("Home",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
+                                Text(
+                                  "Home",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                  ),
                                 ),
-                                ),
-                                Text("Configurações extras",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                ),
+                                Text(
+                                  "Configurações extras",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                  ),
                                 ),
                               ],
                             ),
@@ -74,13 +92,11 @@ class _PerfilState extends State<StatefulWidget> {
                           child: Image.asset(
                             'assets/images/OIP.png',
                             fit: BoxFit.cover,
-                            ),
+                          ),
                         ),
-                        Text(_nomeUsuario,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
+                        Text(
+                          _nomeUsuario,
+                          style: TextStyle(color: Colors.white, fontSize: 20),
                         ),
                       ],
                     ),
@@ -100,31 +116,53 @@ class _PerfilState extends State<StatefulWidget> {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.settings, color: Colors.white,),
-                            ElevatedButton(onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => PerfilConfig()));
-                            },
-                            child: Text("Perfil")),
+                            Icon(Icons.settings, color: Colors.white),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PerfilConfig(),
+                                  ),
+                                );
+                              },
+                              child: Text("Perfil"),
+                            ),
                           ],
                         ),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.settings, color: Colors.white,),
-                            ElevatedButton(onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => Notificacoes()));
-                            },
-                            child: Text("Notificações")),
+                            Icon(Icons.settings, color: Colors.white),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Notificacoes(),
+                                  ),
+                                );
+                              },
+                              child: Text("Notificações"),
+                            ),
                           ],
                         ),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.settings, color: Colors.white,),
-                            ElevatedButton(onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => HistoricoDePromocoes()));
-                            },
-                            child: Text("Histórico de Promoções")),
+                            Icon(Icons.settings, color: Colors.white),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        HistoricoDePromocoes(),
+                                  ),
+                                );
+                              },
+                              child: Text("Histórico de Promoções"),
+                            ),
                           ],
                         ),
                       ],

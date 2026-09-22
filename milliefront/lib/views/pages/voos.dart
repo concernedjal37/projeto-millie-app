@@ -7,34 +7,41 @@ class Voos extends StatefulWidget {
   // ignore: library_private_types_in_public_api
   _VoosState createState() => _VoosState();
 }
+
 class _VoosState extends State<StatefulWidget> {
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: Container(
-          color: Color(0xff303070),
+          color: Color.fromARGB(255, 25, 25, 80),
           width: double.infinity,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(
                 child: Container(
-                  color: Color.fromARGB(255, 95, 95, 207),
+                  color: Color.fromARGB(255, 50, 50, 250),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ElevatedButton(onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
-                      },
-                      child: Text("Home")),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => HomePage()),
+                          );
+                        },
+                        child: Text("Home"),
+                      ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           SizedBox(
-                            child: Text("Ida",
+                            child: Text(
+                              "Ida",
                               style: TextStyle(
                                 fontSize: 30,
                                 color: Colors.white,
@@ -42,13 +49,18 @@ class _VoosState extends State<StatefulWidget> {
                             ),
                           ),
                           TextField(
-                            decoration: InputDecoration(border: OutlineInputBorder()),
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
                           ),
                           TextField(
-                            decoration: InputDecoration(border: OutlineInputBorder()),
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
                           ),
                           SizedBox(
-                            child: Text("Volta",
+                            child: Text(
+                              "Volta",
                               style: TextStyle(
                                 fontSize: 30,
                                 color: Colors.white,
@@ -56,19 +68,23 @@ class _VoosState extends State<StatefulWidget> {
                             ),
                           ),
                           TextField(
-                            decoration: InputDecoration(border: OutlineInputBorder()),
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
                           ),
                           TextField(
-                            decoration: InputDecoration(border: OutlineInputBorder()),
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
                           ),
-                          ElevatedButton(onPressed: () {
-                                
-                          },
-                          child: Text("Filtro")),
-                          ElevatedButton(onPressed: () {
-                                
-                          },
-                          child: Text("Confirmar")),
+                          ElevatedButton(
+                            onPressed: () {},
+                            child: Text("Filtro"),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {},
+                            child: Text("Confirmar"),
+                          ),
                         ],
                       ),
                       Flexible(

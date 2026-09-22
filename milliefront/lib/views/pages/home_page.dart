@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:milliefront/views/pages/configuracoes.dart';
+import 'package:milliefront/views/pages/historico_de_promocoes.dart';
 import 'package:milliefront/views/pages/login.dart';
 import 'package:milliefront/views/pages/perfil.dart';
 import 'package:milliefront/views/pages/promocao_e_cotacao.dart';
@@ -17,13 +18,13 @@ class _HomePageState extends State<StatefulWidget> {
     return Scaffold(
       body: Center(
         child: Container(
-          color: Color(0xff303070),
+          color: Color.fromARGB(255, 25, 25, 80),
           width: double.infinity,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-               Container(
-                color: Color.fromARGB(255, 95, 95, 207),
+              Container(
+                color: Color.fromARGB(255, 30, 30, 200),
                 height: 200.0,
                 width: double.infinity,
                 child: Column(
@@ -31,60 +32,162 @@ class _HomePageState extends State<StatefulWidget> {
                   children: [
                     Row(
                       children: [
-                        ElevatedButton(onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
-                        }, child: Text("Butão pra tela de login placeholder")),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Login()),
+                            );
+                          },
+                          child: Text("Login"),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      //padding: EdgeInsets.all(5.0),
+                      children: [
+                        Image.asset(
+                          'assets/images/Ilustracao414_3.png',
+                          height: 130,
+                          width: 200,
+                        ),
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        ElevatedButton(onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => Voos()));
-                        },
-                        child: Text("Voos")),
-                        ElevatedButton(onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => PromocaoECotacao()));
-                        }, child: Text("Promoções")),
-                        ElevatedButton(onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => PromocaoECotacao()));
-                        }, child: Text("Cotações")),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Text("Voos",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Voos()),
+                            );
+                          },
+                          child: Text("Voos"),
                         ),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => HistoricoDePromocoes(),
+                              ),
+                            );
+                          },
+                          child: Text("Promoções"),
                         ),
-                        Text("Promoções",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
-                        ),
-                        Text("Cotações",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PromocaoECotacao(),
+                              ),
+                            );
+                          },
+                          child: Text("Cotações"),
                         ),
                       ],
                     ),
                   ],
                 ),
-               ),
-               Container(
-                color: Color(0xff303070),
+              ),
+              Container(
+                color: Color.fromARGB(255, 25, 25, 80),
                 width: double.infinity,
-               ),
-               Container(
-                color: Color.fromARGB(255, 95, 95, 207),
+                child: ListView(
+                  scrollDirection: Axis.vertical,
+                  reverse: true,
+                  shrinkWrap: true,
+                  children: [
+                    Card(
+                      elevation: 3.0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/promo1.jpg'),
+                            fit: BoxFit.cover,
+                          ),
+                          gradient: LinearGradient(
+                            colors: [
+                              Color.fromARGB(255, 165, 165, 250),
+                              Color.fromARGB(255, 30, 30, 250),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        padding: EdgeInsets.all(5.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Promoção 1",
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              "Descrição da promoção 1.",
+                              style: TextStyle(fontSize: 14.0),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Card(
+                      elevation: 3.0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/promo2.jpg'),
+                            fit: BoxFit.cover,
+                          ),
+                          gradient: LinearGradient(
+                            colors: [
+                              Color.fromARGB(255, 165, 165, 250),
+                              Color.fromARGB(255, 30, 30, 250),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        padding: EdgeInsets.all(5.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Promoção 2",
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              "Descrição da promoção 2.",
+                              style: TextStyle(fontSize: 14.0),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                color: Color.fromARGB(255, 25, 25, 200),
                 height: 100.0,
                 width: double.infinity,
                 child: Column(
@@ -94,36 +197,40 @@ class _HomePageState extends State<StatefulWidget> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        ElevatedButton(onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => Perfil()));
-                        },
-                        child: Text("Perfil")),
-                        ElevatedButton(onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => Configuracoes()));
-                        }, child: Text("Configurações extras")),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Text("Perfil",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
+                        //ElevatedButton(onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => Perfil()));},child: Text("Perfil")),
+                        IconButton(
+                          icon: Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 50,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Perfil()),
+                            );
+                          },
                         ),
-                        ),
-                        Text("Configurações extras",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.settings,
+                            color: Colors.white,
+                            size: 50,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Configuracoes(),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
                   ],
                 ),
-               ),
+              ),
             ],
           ),
         ),
