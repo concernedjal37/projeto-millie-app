@@ -34,16 +34,14 @@ DIREITOS:      (c) Copyright [2026] - [Millie Tecnologies].
 """
 
 import asyncio
+import json
 import os
 from dotenv import load_dotenv, find_dotenv
-from pydantic import BaseModel
-from datetime import datetime
 from google.genai import types
 from google import genai
 from telethon import TelegramClient
 from telethon.tl.functions.channels import JoinChannelRequest
 import Teste_Objetos
-import telethon
 print('Abrindo Bibliotecas...')
 print('Carregando variáveis de ambiente...')
 # Carregando variáveis de ambiente do arquivo .env
@@ -93,20 +91,21 @@ async def Procura_mensagem(Telegram_Client, Canal, limit, Palavra):
 def Prompt_Gemini_Cotacao(Prompt: str):
     print('Enviando Prompt para o Gemini...\nAguarde a resposta...')
     try:
-        response = Gemini_Client.models.generate_content(
-            model='gemini-3.5-flash',
-            contents=Prompt,
+        response = Gemini_Client.chats.create(
+            model='gemini-3.1-pro-preview').send_message(
+            message=Prompt,
             config={
                 "response_mime_type": "application/json",
-                "response_schema": Teste_Objetos.Cotacao
+                "response_schema": list[Teste_Objetos.Cotacao]
             }
         )
 
         print('Resposta recebida do Gemini.\n')
         # Retornando a resposta do Gemini como um objeto Cotacao
-        return response.parsed
+        return Teste_Objetos.Cotacao.model_validate_json(response.text)
+
     except Exception as e:
-        print("Erro na conexão com o Gemini:")
+        print("Erro na conexão com o Gemini ou na validação do JSON:")
         print(e)
         return None
 
@@ -117,19 +116,19 @@ def Prompt_Gemini_Cotacao(Prompt: str):
 def Prompt_Gemini_Transferencia(Prompt: str):
     print('Enviando Prompt para o Gemini...\nAguarde a resposta...')
     try:
-        response = Gemini_Client.models.generate_content(
-            model='gemini-3.5-flash',
-            contents=Prompt,
+        response = Gemini_Client.chats.create(
+            model='gemini-3.1-pro-preview').send_message(
+            message=Prompt,
             config={
                 "response_mime_type": "application/json",
-                "response_schema": Teste_Objetos.Transferencia_Bonificada
+                "response_schema": list[Teste_Objetos.Transferencia_Bonificada]
             }
         )
         print('Resposta recebida do Gemini.\n')
         # Retornando a resposta do Gemini como um objeto Transferencia_Bonificada
-        return response.parsed
+        return Teste_Objetos.Transferencia_Bonificada.model_validate_json(response.text)
     except Exception as e:
-        print("Erro na conexão com o Gemini:")
+        print("Erro na conexão com o Gemini ou na validação do JSON:")
         print(e)
         return None
 
@@ -148,6 +147,7 @@ async def main():
         print('3 - Pesquisar Transferência Bonificada')
         print('4 - Perguntar ao Gemini sobre Cotação de Milhas')
         print('5 - Perguntar ao Gemini sobre Transferência Bonificada')
+        print('6 - Arquivar dados em JSON')
         print('0 - Sair')
         Opcao = input("Digite a Opção: ")
 
@@ -179,6 +179,7 @@ async def main():
                 # Coletando Última Mensagem de Cotação de milhas
                 Prompt = mensagem_Cota.text
                 Resposta = Prompt_Gemini_Cotacao(Prompt)
+
                 # Imprimindo a resposta do Gemini ou informando que não foi encontrada
                 if Resposta is not None:
                     print("\nResposta do Gemini:")
@@ -192,7 +193,14 @@ async def main():
                 if Resposta is not None:
                     print("\nResposta do Gemini:")
                     print("-" * 40)
-                    Resposta.Print_Transferencia()
+                    Resposta.Print_Transf()
+            case '6':
+                # Arquivando todos os dados (Cotações e Transferências) em um arquivo JSON
+                print('Arquivando dados em JSON' + '*'*40)
+                print('Abrindo arquivo cotacoes.json para escrita')
+                with open('cotacoes.json', 'w', encoding='utf-8') as arquivo:
+                    print('Escrevendo dados no arquivo cotacoes.json' + '*'*40)
+                    json.dump(Resposta.json(), arquivo, indent=4, default=str)
 
 with Telegram_Client:
     Telegram_Client.loop.run_until_complete(main())

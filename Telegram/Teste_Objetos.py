@@ -32,17 +32,17 @@ DIREITOS:      (c) Copyright [2026] - [Millie Tecnologies].
 """
 
 from datetime import datetime
+from pydantic import BaseModel
 
 # Classe de cotação de milhas
 
 
-class Cotacao:
-    def __init__(self, Plataforma: str, Agencia: str, Media: float, Data_Vencimento, Monte: str):
-        self.Plataforma = Plataforma
-        self.Agencia = Agencia
-        self.Media = Media
-        self.Monte = Monte
-        self.Data_Vencimento = Data_Vencimento
+class Cotacao(BaseModel):
+    Plataforma: str
+    Agencia: str
+    Media: float
+    Data_Vencimento: datetime
+    Monte: str
 
     def Print_Cota(self):
         print('--'*40 + '\nPlataforma: ', self.Plataforma)
@@ -55,14 +55,13 @@ class Cotacao:
 # Classe de transferencia bonificada de milhas
 
 
-class Transferencia_Bonificada:
-    def __init__(self, Origem: str, Destino: str, Porcent_High: float, Porcent_Low: float, Data_Vencimento, link: str):
-        self.Origem = Origem
-        self.Destino = Destino
-        self.Porcent_High = Porcent_High
-        self.Porcent_Low = Porcent_Low
-        self.Data_Vencimento = Data_Vencimento
-        self.link = link
+class Transferencia_Bonificada(BaseModel):
+    Origem: str
+    Destino: str
+    Porcent_High: float
+    Porcent_Low: float
+    Data_Vencimento: datetime
+    link: str
 
     def Print_Transf(self):
         print('--'*40 + '\nOrigem: ', self.Origem)
@@ -76,13 +75,12 @@ class Transferencia_Bonificada:
 
 # Classe de compra bonificada de milhas
 
-class Compra_Bonificada:
-    def __init__(self, Agencia: str, Porcent_High: float, Porcent_Low: float, Data_Vencimento, link: str):
-        self.Agencia = Agencia
-        self.Porcent_High = Porcent_High
-        self.Porcent_Low = Porcent_Low
-        self.Data_Vencimento = Data_Vencimento
-        self.link = link
+class Compra_Bonificada(BaseModel):
+    Agencia: str
+    Porcent_High: float
+    Porcent_Low: float
+    Data_Vencimento: datetime
+    link: str
 
     def Print_Compra(self):
         print('--'*40 + '\nAgência / Plataforma: ', self.Agencia)
@@ -95,12 +93,11 @@ class Compra_Bonificada:
 
 # Classe de adesão bonificada à uma agencia ou plataforma
 
-class Adesao_Bonificada:
-    def __init__(self, Agencia: str, Milhas: int, Data_Vencimento, link: str):
-        self.Agencia = Agencia
-        self.Milhas = Milhas
-        self.Data_Vencimento = Data_Vencimento
-        self.link = link
+class Adesao_Bonificada(BaseModel):
+    Agencia: str
+    Milhas: int
+    Data_Vencimento: datetime
+    link: str
 
     def Print_Adesao(self):
         print('--'*40 + '\nAgência / Plataforma: ', self.Agencia)
