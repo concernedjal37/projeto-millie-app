@@ -16,6 +16,44 @@ class _HomePageState extends State<StatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
+      drawer: Drawer(
+        child: Column(
+          children: [
+            DrawerHeader(child: Text('Millie')),
+            ListTile(
+              leading: Icon(Icons.login),
+              title: Text('Login'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Login()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Perfil'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Perfil()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Configurações'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Configuracoes()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       body: Center(
         child: Container(
           color: Color.fromARGB(255, 25, 25, 80),
@@ -38,34 +76,14 @@ class _HomePageState extends State<StatefulWidget> {
                 height: 200.0,
                 width: double.infinity,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Login()),
-                            );
-                          },
-                          child: Text("Login"),
-                        ),
-                      ],
+                    Image.asset(
+                      'assets/images/Ilustracao414_3.png',
+                      height: 165,
+                      width: 300,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      //padding: EdgeInsets.all(5.0),
-                      children: [
-                        Image.asset(
-                          'assets/images/Ilustracao414_3.png',
-                          height: 110,
-                          width: 200,
-                        ),
-                      ],
-                    ),
-                    Padding(
+                    /* Padding(
                       padding: const EdgeInsets.all(5.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -104,7 +122,7 @@ class _HomePageState extends State<StatefulWidget> {
                           ),
                         ],
                       ),
-                    ),
+                    ), */
                   ],
                 ),
               ),
@@ -329,64 +347,21 @@ class _HomePageState extends State<StatefulWidget> {
                   ],
                 ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  gradient: LinearGradient(
-                    colors: [
-                      Color.fromARGB(255, 165, 165, 250),
-                      Color.fromARGB(255, 30, 30, 250),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                height: 100.0,
-                width: double.infinity,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        //ElevatedButton(onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => Perfil()));},child: Text("Perfil")),
-                        IconButton(
-                          icon: Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 50,
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Perfil()),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.settings,
-                            color: Colors.white,
-                            size: 50,
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Configuracoes(),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: NavigationBar(
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Icons.flight),
+            label: 'Voos',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.monetization_on),
+            label: 'Promoções e Cotacões',
+          ),
+        ],
       ),
     );
   }
