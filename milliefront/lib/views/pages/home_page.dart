@@ -354,6 +354,10 @@ class _HomePageState extends State<StatefulWidget> {
       bottomNavigationBar: NavigationBar(
         destinations: [
           NavigationDestination(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.flight),
             label: 'Voos',
           ),
