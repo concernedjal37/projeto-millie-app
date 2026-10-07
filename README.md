@@ -62,3 +62,7 @@ ou “Melhor estratégia: transferir seus pontos com 100% de bônus e emitir uti
 7. **Dashboard personalizado**
 
 Centraliza pesquisas, promoções, oportunidades e resultados das simulações do usuário.
+
+Documentos digitais:
+
+.Fluxo de navegação do usuario: https://docs.google.com/document/d/1Z98w6ztVBiZ5W9ZksdWu3eTd7HcU_WAV2BaETkbtXuM/edit?usp=sharing
