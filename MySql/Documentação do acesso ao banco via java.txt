@@ -1,0 +1,1 @@
+Para poder rodar o banco de dados é necessario abrir a pasta banco nela mesma no vscode e depois no lado superior esquerdo tera algumas opções, clique na opção Run->Run whit out debuging e veja o resultado. para atualizar ele também é bem simples, basta salvar qualquer alteração no java e rodar esse comando de novo que já deveria funcionar.
