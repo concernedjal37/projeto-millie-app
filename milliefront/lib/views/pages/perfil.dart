@@ -13,7 +13,7 @@ class Perfil extends StatefulWidget {
 }
 
 class _PerfilState extends State<StatefulWidget> {
-  var _nomeUsuario = "Arthur";
+  final _nomeUsuario = "Arthur";
   @override
   Widget build(BuildContext context) {
     return Scaffold(

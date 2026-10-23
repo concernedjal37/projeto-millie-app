@@ -8,8 +8,8 @@ class Login extends StatefulWidget {
   _LoginState createState() => _LoginState();
 }
 class _LoginState extends State<StatefulWidget> {
-  var _nomeUsuario = "";
-  var _senha = "";
+  final _nomeUsuario = "";
+  final _senha = "";
   @override
   Widget build(BuildContext context){
     return Scaffold(
