@@ -10,7 +10,7 @@ import java.sql.Statement;
 public class Main {
     public static void main(String[] args) throws Exception{
         try{
-            Connection connection = DriverManager.getConnection("jdbc:mariadb://localhost:3306/Banco_da_Millie?user=root&password=50BMG");
+            Connection connection = DriverManager.getConnection("jdbc:mariadb://100.79.171.116:3306/Banco_da_Millie?user=java_user&password=50BMG");
             Statement algo =  connection.createStatement();
             ResultSet resultado = algo.executeQuery("select * from Usuarios");
             while (resultado.next()) {
