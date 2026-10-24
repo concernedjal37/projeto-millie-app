@@ -16,62 +16,67 @@ class _LoginState extends State<StatefulWidget> {
       body: Center(
         child: Container(
           color: Color.fromARGB(255, 30, 30, 130),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                child: Image.asset('assets/images/Ilustracao414_3.png',
-                  height: 200,
-                  width: 450,
-                ),
-              ),
-              SizedBox(
-                child: Text("Usuario",
-                  style: TextStyle(
-                    fontSize: 30,
-                    color: Colors.white,
+          padding: EdgeInsets.all(50.0),
+          child: Container(
+            padding: EdgeInsets.all(10.0),
+            decoration: BoxDecoration(
+              color: Color(0xffffffff),
+              borderRadius: BorderRadius.circular(25.0),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  child: Image.asset('assets/images/Logo_preto.png',
+                    height: 200,
+                    width: 450,
                   ),
                 ),
-              ),
-              TextField(
-                decoration: InputDecoration(border: OutlineInputBorder()),
-              ),
-              SizedBox(
-                child: Text("Senha",
-                  style: TextStyle(
-                    fontSize: 30,
-                    color: Colors.white,
+                SizedBox(
+                  child: Text("Usuario",
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
-              ),
-              TextField(
-                decoration: InputDecoration(border: OutlineInputBorder()),
-              ),
-              ElevatedButton(onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 95, 95, 207),
-              ),
-              child: Text("Entrar",
-              style: TextStyle(
-                color: Colors.white,
-              ),
-              )),
-              ElevatedButton(onPressed: () {
-                
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xff303070),
-              ),
-              child: Text("Esqueci Minha senha",
-              style: TextStyle(
-                fontSize: 10,
-                color: Colors.blueAccent,
-              ),
-              )),
-            ],
+                TextField(
+                  decoration: InputDecoration(border: OutlineInputBorder()),
+                ),
+                SizedBox(
+                  child: Text("Senha",
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                TextField(
+                  decoration: InputDecoration(border: OutlineInputBorder()),
+                ),
+                ElevatedButton(onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color.fromARGB(255, 95, 95, 207),
+                ),
+                child: Text("Entrar",
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+                )),
+                TextButton(onPressed: () {
+                  
+                },
+                child: Text("Esqueci Minha senha",
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.blueAccent,
+                ),
+                )),
+              ],
+            ),
           ),
         ),
       ),

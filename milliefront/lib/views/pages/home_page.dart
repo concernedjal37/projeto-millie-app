@@ -363,7 +363,11 @@ class _HomePageState extends State<StatefulWidget> {
           ),
           NavigationDestination(
             icon: Icon(Icons.monetization_on),
-            label: 'Promoções e Cotacões',
+            label: 'Promoções',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.monetization_on),
+            label: 'Cotacões',
           ),
         ],
       ),
