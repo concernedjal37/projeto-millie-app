@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:milliefront/views/pages/home_page.dart';
+import 'package:milliefront/views/widget_tree.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -56,7 +56,7 @@ class _LoginState extends State<StatefulWidget> {
                   decoration: InputDecoration(border: OutlineInputBorder()),
                 ),
                 ElevatedButton(onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => WidgetTree()));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color.fromARGB(255, 95, 95, 207),

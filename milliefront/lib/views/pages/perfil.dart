@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:milliefront/views/pages/configuracoes.dart';
 import 'package:milliefront/views/pages/historico_de_promocoes.dart';
-import 'package:milliefront/views/pages/home_page.dart';
 import 'package:milliefront/views/pages/notificacoes.dart';
 import 'package:milliefront/views/pages/perfil_config.dart';
+import 'package:milliefront/views/widget_tree.dart';
 
 class Perfil extends StatefulWidget {
   const Perfil({super.key});
@@ -19,17 +18,19 @@ class _PerfilState extends State<StatefulWidget> {
     return Scaffold(
       body: Center(
         child: Container(
-          color: Colors.white,
-          width: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: FractionallySizedBox(
-                  heightFactor: 1,
-                  widthFactor: 1,
-                  child: Container(
-                    color: Color.fromARGB(255, 50, 50, 240),
+          color: Color.fromARGB(255, 30, 30, 130),
+          padding: EdgeInsets.all(50.0),
+          child: Container(
+            padding: EdgeInsets.all(10.0),
+            decoration: BoxDecoration(
+              color: Color(0xffffffff),
+              borderRadius: BorderRadius.circular(25.0),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: SizedBox(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -37,58 +38,27 @@ class _PerfilState extends State<StatefulWidget> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               mainAxisSize: MainAxisSize.max,
                               children: [
-                                ElevatedButton(
+                                BackButton(
                                   onPressed: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => HomePage(),
+                                        builder: (context) => WidgetTree(),
                                       ),
                                     );
                                   },
-                                  child: Text("Home"),
                                 ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => Configuracoes(),
-                                      ),
-                                    );
-                                  },
-                                  child: Text("Configurações extras"),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Text(
-                                  "Home",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                                Text(
-                                  "Configurações extras",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                  ),
-                                ),
+                                Text('Perfil', style: TextStyle(fontSize: 18)),
                               ],
                             ),
                           ],
                         ),
                         SizedBox(
                           child: Card(
-                            color: Color.fromARGB(255, 50, 50, 240),
+                            color: Color.fromARGB(255, 255, 255, 255),
                             child: CircleAvatar(
                               radius: 100,
                               backgroundImage: AssetImage(
@@ -99,81 +69,79 @@ class _PerfilState extends State<StatefulWidget> {
                         ),
                         Text(
                           _nomeUsuario,
-                          style: TextStyle(color: Colors.white, fontSize: 20),
+                          style: TextStyle(color: Colors.black, fontSize: 20),
                         ),
                       ],
                     ),
                   ),
                 ),
-              ),
-              Flexible(
-                child: FractionallySizedBox(
-                  heightFactor: 1,
-                  widthFactor: 1,
-                  child: Container(
-                    color: Color(0xff303070),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.settings, color: Colors.white),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PerfilConfig(),
-                                  ),
-                                );
-                              },
-                              child: Text("Perfil"),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.settings, color: Colors.white),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Notificacoes(),
-                                  ),
-                                );
-                              },
-                              child: Text("Notificações"),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.settings, color: Colors.white),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        HistoricoDePromocoes(),
-                                  ),
-                                );
-                              },
-                              child: Text("Histórico de Promoções"),
-                            ),
-                          ],
-                        ),
-                      ],
+                Flexible(
+                  child: SizedBox(
+                    child: Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.settings, color: Colors.black),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PerfilConfig(),
+                                    ),
+                                  );
+                                },
+                                child: Text("Perfil"),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.settings, color: Colors.black),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Notificacoes(),
+                                    ),
+                                  );
+                                },
+                                child: Text("Notificações"),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.settings, color: Colors.black),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          HistoricoDePromocoes(),
+                                    ),
+                                  );
+                                },
+                                child: Text("Histórico de Promoções"),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

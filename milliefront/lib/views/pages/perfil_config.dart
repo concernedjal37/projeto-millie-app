@@ -40,7 +40,7 @@ class _PerfilConfigState extends State<StatefulWidget> {
                         );
                       },
                     ),
-                    Text('Perfil', style: TextStyle(fontSize: 18)),
+                    Text('Configurações do Perfil', style: TextStyle(fontSize: 18)),
                   ],
                 ),
                 Column(

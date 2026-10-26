@@ -1,10 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:milliefront/views/pages/configuracoes.dart';
-import 'package:milliefront/views/pages/historico_de_promocoes.dart';
-import 'package:milliefront/views/pages/login.dart';
-import 'package:milliefront/views/pages/perfil.dart';
-import 'package:milliefront/views/pages/promocao_e_cotacao.dart';
-import 'package:milliefront/views/pages/voos.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,48 +7,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<StatefulWidget> {
+  
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      drawer: Drawer(
-        child: Column(
-          children: [
-            DrawerHeader(child: Text('Millie')),
-            ListTile(
-              leading: Icon(Icons.login),
-              title: Text('Login'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Login()),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Perfil'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Perfil()),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Configurações'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Configuracoes()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-      body: Center(
+    return Center(
         child: Container(
           color: Color.fromARGB(255, 25, 25, 80),
           width: double.infinity,
@@ -83,46 +39,6 @@ class _HomePageState extends State<StatefulWidget> {
                       height: 165,
                       width: 300,
                     ),
-                    /* Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => Voos()),
-                              );
-                            },
-                            child: Text("Voos"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PromocaoECotacao(),
-                                ),
-                              );
-                            },
-                            child: Text("Promoções"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PromocaoECotacao(),
-                                ),
-                              );
-                            },
-                            child: Text("Cotações"),
-                          ),
-                        ],
-                      ),
-                    ), */
                   ],
                 ),
               ),
@@ -350,27 +266,6 @@ class _HomePageState extends State<StatefulWidget> {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: NavigationBar(
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.flight),
-            label: 'Voos',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.monetization_on),
-            label: 'Promoções',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.monetization_on),
-            label: 'Cotacões',
-          ),
-        ],
-      ),
-    );
+      );
   }
 }
