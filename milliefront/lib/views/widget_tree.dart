@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:milliefront/data/notifiers.dart';
 import 'package:milliefront/views/pages/historico_de_promocoes.dart';
 import 'package:milliefront/views/pages/home_page.dart';
 import 'package:milliefront/views/pages/notificacoes.dart';
@@ -8,7 +9,7 @@ import 'package:milliefront/views/pages/perfil.dart';
 import 'package:milliefront/views/pages/configuracoes.dart';
 import 'package:milliefront/views/pages/promocao_e_cotacao.dart';
 import 'package:milliefront/views/pages/voos.dart';
-import 'package:milliefront/widgets/navbar_widget.dart';
+import 'package:milliefront/views/widgets/navbar_widget.dart';
 
 List<Widget> pages = [
   HomePage(),
@@ -31,7 +32,7 @@ class WidgetTree extends StatelessWidget {
       appBar: AppBar(),
       drawer: Drawer(
         child: Column(
-         children: [
+          children: [
             DrawerHeader(child: Text('Millie')),
             ListTile(
               leading: Icon(Icons.login),
@@ -66,7 +67,12 @@ class WidgetTree extends StatelessWidget {
           ],
         ),
       ),
-      body: pages.elementAt(0),
+      body: ValueListenableBuilder(
+        valueListenable: selectedPageNotifier,
+        builder: (context, selectedPage, child) {
+          return pages.elementAt(selectedPage);
+        },
+      ),
       bottomNavigationBar: NavbarWidget(),
     );
   }
