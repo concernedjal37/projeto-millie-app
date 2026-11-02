@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:milliefront/views/pages/home_page.dart';
+import 'package:milliefront/views/widget_tree.dart';
 
 class Configuracoes extends StatefulWidget {
   const Configuracoes({super.key});
@@ -35,7 +35,7 @@ class _ConfiguracoesState extends State<StatefulWidget> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => HomePage()),
+                          MaterialPageRoute(builder: (context) => WidgetTree()),
                         );
                       },
                     ),

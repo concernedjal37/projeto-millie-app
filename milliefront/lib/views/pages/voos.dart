@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:milliefront/views/pages/home_page.dart';
 
 class Voos extends StatefulWidget {
   const Voos({super.key});
@@ -11,88 +10,125 @@ class Voos extends StatefulWidget {
 class _VoosState extends State<StatefulWidget> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Container(
-          color: Color.fromARGB(255, 25, 25, 80),
-          width: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
+    return Center(
+      child: Container(
+        color: Color.fromARGB(255, 25, 25, 80),
+        width: double.infinity,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
                 child: Container(
-                  color: Color.fromARGB(255, 50, 50, 250),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    gradient: LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 165, 165, 250),
+                        Color.fromARGB(255, 30, 30, 250),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => HomePage()),
-                          );
-                        },
-                        child: Text("Home"),
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            child: Text(
-                              "Ida",
-                              style: TextStyle(
-                                fontSize: 30,
-                                color: Colors.white,
+                      Container(
+                        padding: EdgeInsets.all(10.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              child: Text(
+                                "Ida",
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
-                          ),
-                          TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          SizedBox(
-                            child: Text(
-                              "Volta",
-                              style: TextStyle(
-                                fontSize: 30,
-                                color: Colors.white,
+                            TextField(
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Local de partida:',
+                                hintStyle: TextStyle(
+                                  color: Color(0xd0ffffff),
+                                  fontSize: 18.0,
+                                ),
                               ),
                             ),
-                          ),
-                          
-                          TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
+                            TextField(
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Local do destino:',
+                                hintStyle: TextStyle(
+                                  color: Color(0xd0ffffff),
+                                  fontSize: 18.0,
+                                ),
+                              ),
                             ),
-                          ),
-                          TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
+                            SizedBox(
+                              child: Text(
+                                "Volta",
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {},
-                            child: Text("Filtro"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {},
-                            child: Text("Confirmar"),
-                          ),
-                        ],
+                            TextField(
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Local de partida:',
+                                hintStyle: TextStyle(
+                                  color: Color(0xd0ffffff),
+                                  fontSize: 18.0,
+                                ),
+                              ),
+                            ),
+                            TextField(
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Local do destino:',
+                                hintStyle: TextStyle(
+                                  color: Color(0xd0ffffff),
+                                  fontSize: 18.0,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(5.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {},
+                                    child: Text("Filtro"),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {},
+                                    child: Text("Confirmar"),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       Flexible(
                         child: Container(
-                          color: Color(0xff303070),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.vertical(top: Radius.zero, bottom: Radius.circular(10.0)),
+                            color: Color(0xff303070),
+                          ),
                           width: double.infinity,
                           child: ListView(
+                            padding: EdgeInsets.all(5.0),
                             scrollDirection: Axis.vertical,
                             children: [
                               Card(
@@ -124,8 +160,8 @@ class _VoosState extends State<StatefulWidget> {
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
