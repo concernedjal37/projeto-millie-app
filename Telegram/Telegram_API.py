@@ -41,9 +41,9 @@ from google.genai import types
 from google import genai
 from telethon import TelegramClient
 from telethon.tl.functions.channels import JoinChannelRequest
-import Teste_Objetos
+import Objetos
 import threading
-import time
+import mariadb
 
 print('Abrindo Bibliotecas...')
 print('Carregando variáveis de ambiente...')
@@ -70,6 +70,7 @@ print('Chaves de acesso estabelecidas.\n'+'*'*40)
 executando = threading.Event()
 thread_tarefa = None
 
+
 async def Entrar_Canal(Telegram_Client, Canal):
     print('Entrando no Canal: ', Canal)
     try:
@@ -85,11 +86,14 @@ async def Entrar_Canal(Telegram_Client, Canal):
 async def Procura_mensagem(Telegram_Client, Canal, limit, Palavra):
     print('Procurando mensagem...')
     async for message in Telegram_Client.iter_messages(Canal, limit, search=Palavra):
-        print(f"Mensagem encontrada.\n")
+        print(f'Mensagem encontrada.' + '*'*40 + '\n')
         if message.text:
             return message
 
 # Funçao de Prompt do Gemini para Cotação de Milhas
+# Resposta do Gemini estruturada em JSON
+
+# Função de Prompt do Gemini para Transferências Bonificadas de Milhas
 # Resposta do Gemini estruturada em JSON
 
 
@@ -97,45 +101,83 @@ def Prompt_Gemini_Cotacao(Prompt: str):
     print('Enviando Prompt para o Gemini...\nAguarde a resposta...')
     try:
         response = Gemini_Client.chats.create(
-            model='gemini-3.1-pro-preview').send_message(
+            model='gemini-3.5-flash-lite').send_message(
             message=Prompt,
             config={
                 "response_mime_type": "application/json",
-                "response_schema": list[Teste_Objetos.Cotacao]
+                "response_schema": Objetos.Cotacao
             }
         )
 
         print('Resposta recebida do Gemini.\n')
         # Retornando a resposta do Gemini como um objeto Cotacao
-        return Teste_Objetos.Cotacao.model_validate_json(response.text)
+        return Objetos.Cotacao.model_validate_json(response.text)
 
     except Exception as e:
         print("Erro na conexão com o Gemini ou na validação do JSON:")
         print(e)
         return None
-
-# Função de Prompt do Gemini para Transferências Bonificadas de Milhas
-# Resposta do Gemini estruturada em JSON
 
 
 def Prompt_Gemini_Transferencia(Prompt: str):
     print('Enviando Prompt para o Gemini...\nAguarde a resposta...')
     try:
         response = Gemini_Client.chats.create(
-            model='gemini-3.1-pro-preview').send_message(
+            model='gemini-3.5-flash-lite').send_message(
             message=Prompt,
             config={
                 "response_mime_type": "application/json",
-                "response_schema": list[Teste_Objetos.Transferencia_Bonificada]
+                "response_schema": Objetos.Transferencia_Bonificada
             }
         )
         print('Resposta recebida do Gemini.\n')
         # Retornando a resposta do Gemini como um objeto Transferencia_Bonificada
-        return Teste_Objetos.Transferencia_Bonificada.model_validate_json(response.text)
+        return Objetos.Transferencia_Bonificada.model_validate_json(response.text)
     except Exception as e:
         print("Erro na conexão com o Gemini ou na validação do JSON:")
         print(e)
         return None
+
+
+def Prompt_Gemini_Compra(Prompt: str):
+    print('Enviando Prompt para o Gemini...\nAguarde a resposta...')
+    try:
+        response = Gemini_Client.chats.create(
+            model='gemini-3.5-flash-lite').send_message(
+            message=Prompt,
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": Objetos.Compra_Bonificada
+            }
+        )
+        print('Resposta recebida do Gemini.\n')
+        # Retornando a resposta do Gemini como um objeto Compra_Bonificada
+        return Objetos.Compra_Bonificada.model_validate_json(response.text)
+    except Exception as e:
+        print("Erro na conexão com o Gemini ou na validação do JSON:")
+        print(e)
+        return None
+
+
+def Prompt_Gemini_Adesao(Prompt: str):
+    print('Enviando Prompt para o Gemini...\nAguarde a resposta...')
+    try:
+        response = Gemini_Client.chats.create(
+            model='gemini-3.5-flash-lite').send_message(
+            message=Prompt,
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": Objetos.Adesao_Bonificada
+            }
+        )
+        print('Resposta recebida do Gemini.\n')
+        # Retornando a resposta do Gemini como um objeto Adesao_Bonificada
+        return Objetos.Adesao_Bonificada.model_validate_json(response.text)
+    except Exception as e:
+        print("Erro na conexão com o Gemini ou na validação do JSON:")
+        print(e)
+        return None
+
 
 def loop_trabalho():
     """Função que roda 24/7 enquanto o evento estiver ativo."""
@@ -146,45 +188,49 @@ def loop_trabalho():
             # Instanciando os Link dos canais do Telegram
             Canal_Cota = 'https://t.me/cotacoes'
             Canal_Pronto_voar = 'https://t.me/canalpontospravoar'
-            Opcao = ' '  # Instanciando a variável de opção do menu
+
+            # Entrando No Canal de Cotações de Milhas
+            await Entrar_Canal(Telegram_Client, Canal_Cota)
+            await Entrar_Canal(Telegram_Client, Canal_Pronto_voar)
+
+            print(
+                '*'*40 + 'Coletando dados iniciais, primeiro acesso aos canais do Telegram...')
+            # Coletando última mensagem de Cotação de milhas
+            print('Coletando última mensagem de Cotação de milhas')
+            Palavra_Procura = 'Tendencias'
+            mensagem_Cota = await Procura_mensagem(Telegram_Client, Canal_Cota, limit, Palavra_Procura)
+
+            # Coletando última mensagem de Transferência Bonificada
+            print('Coletando última mensagem de Transferência Bonificada')
+            Palavra_Procura = 'Transferência bonificada'
+            mensagem_Transf = await Procura_mensagem(Telegram_Client, Canal_Pronto_voar, limit, Palavra_Procura)
+
+            # Coletando última mensagem de Compra Bonificada
+            print('Coletando última mensagem de Compra Bonificada')
+            Palavra_Procura = 'Compra de milhas'
+            mensagem_Compra = await Procura_mensagem(Telegram_Client, Canal_Pronto_voar, limit, Palavra_Procura)
+
+            # Coletando última mensagem de Adesão a Clube Bonificada
+            print('Coletando última mensagem de Adesão a Clube Bonificada')
+            Palavra_Procura = 'Adesão'
+            mensagem_Adesao = await Procura_mensagem(Telegram_Client, Canal_Pronto_voar, limit, Palavra_Procura)
+
             while True:
                 # Menu de opções do Teste da API do Telegram
+
                 print('Menu Teste Telegram API')
                 print('-'*40)
-                print('1 - Entrar em todos os canais')
-                print('2 - Pesquisar Cotação de Milhas')
-                print('3 - Pesquisar Transferência Bonificada')
-                print('4 - Perguntar ao Gemini sobre Cotação de Milhas')
-                print('5 - Perguntar ao Gemini sobre Transferência Bonificada')
-                print('6 - Arquivar dados em JSON')
+                print('1 - Perguntar ao Gemini sobre Cotação de Milhas')
+                print('2 - Perguntar ao Gemini sobre Transferência Bonificada')
+                print('3 - Perguntar ao Gemini sobre Compra Bonificada')
+                print('4 - Perguntar ao Gemini sobre Adesão a Clube Bonificada')
+                print('6 - Salvando dados de Cotação de Milhas')
                 print('0 - Sair')
-                
+                Opcao = input('Escolha uma opção: ')
                 # Executando a opção escolhida
                 match Opcao:
                     case '1':
-                        # Entrando No Canal de Cotações de Milhas
-                        await Entrar_Canal(Telegram_Client, Canal_Cota)
-                        await Entrar_Canal(Telegram_Client, Canal_Pronto_voar)
-                    case '2':
-                        # Coletando Última Mensagem de Cotação de milhas
-                        Palavra_Procura = 'Tendencias'
-                        mensagem_Cota = await Procura_mensagem(Telegram_Client, Canal_Cota, limit, Palavra_Procura)
-                        # Imprimindo a mensagem encontrada ou informando que não foi encontrada
-                        if mensagem_Cota is not None:
-                            print(mensagem_Cota.text)
-                        else:
-                            print('Mensagem Não Encontrada')
-                    case '3':
-                        # Coletando Última Mensagem de Transferência Bonificada
-                        Palavra_Procura = 'Transferência bonificada'
-                        mensagem_Transf = await Procura_mensagem(Telegram_Client, Canal_Pronto_voar, limit, Palavra_Procura)
-                        # Imprimindo a mensagem encontrada ou informando que não foi encontrada
-                        if mensagem_Transf is not None:
-                            print(mensagem_Transf.text)
-                        else:
-                            print('Mensagem Não Encontrada')
-                    case '4':
-                        # Coletando Última Mensagem de Cotação de milhas
+                        # Perguntando ao Gemini sobre Cotação de milhas
                         Prompt = mensagem_Cota.text
                         Resposta = Prompt_Gemini_Cotacao(Prompt)
 
@@ -193,8 +239,8 @@ def loop_trabalho():
                             print("\nResposta do Gemini:")
                             print("-" * 40)
                             Resposta.Print_Cota()
-                    case '5':
-                        # Coletando Última Mensagem de Transferência Bonificada
+                    case '2':
+                        # Perguntando ao Gemini sobre Transferência Bonificada
                         Prompt = mensagem_Transf.text
                         Resposta = Prompt_Gemini_Transferencia(Prompt)
                         # Imprimindo a resposta do Gemini ou informando que não foi encontrada
@@ -202,17 +248,63 @@ def loop_trabalho():
                             print("\nResposta do Gemini:")
                             print("-" * 40)
                             Resposta.Print_Transf()
+
+                        opcao = 0
+                    case '3':
+                        # Perguntando ao Gemini sobre Compra Bonificada
+                        Prompt = mensagem_Compra.text
+                        Resposta = Prompt_Gemini_Compra(Prompt)
+
+                        # Imprimindo a resposta do Gemini ou informando que não foi encontrada
+                        if Resposta is not None:
+                            print("\nResposta do Gemini:")
+                            print("-" * 40)
+                            Resposta.Print_Compra()
+                    case '4':
+                        # Perguntando ao Gemini sobre Adesão a clubes bonificada
+                        Prompt = mensagem_Adesao.text
+                        Resposta = Prompt_Gemini_Adesao(Prompt)
+
+                        # Imprimindo a resposta do Gemini ou informando que não foi encontrada
+                        if Resposta is not None:
+                            print("\nResposta do Gemini:")
+                            print("-" * 40)
+                            Resposta.Print_Adesao()
+
                     case '6':
-                        # Arquivando todos os dados (Cotações e Transferências) em um arquivo JSON
-                        print('Arquivando dados em JSON' + '*'*40)
-                        print('Abrindo arquivo cotacoes.json para escrita')
-                        with open('cotacoes.json', 'w', encoding='utf-8') as arquivo:
-                            print('Escrevendo dados no arquivo cotacoes.json' + '*'*40)
-                            json.dump(Resposta.json(), arquivo, indent=4, default=str)
+                        # Salvando dados de Cotação de Milhas no banco de dados
+                        try:
+                            connection = mariadb.connect(
+                                host="100.79.171.116",
+                                port=3306,
+                                database="Banco_da_Millie",
+                                user="java_user",
+                                password="50BMG"
+                            )
+                            cursor = connection.cursor()
+
+                            # Query SQL com placeholders (?)
+                            sql = """
+                                INSERT INTO cotacoes (Plataforma, valor)
+                                VALUES (?, ?)
+                            """
+                            cursor.execute(sql, (
+                                Resposta.Plataforma,
+                                Resposta.Media
+                            ))
+                            connection.commit()
+                        except mariadb.Error as e:
+                            print(
+                                f"[ERRO] Erro ao salvar dados no banco de dados: {e}")
+                        finally:
+                            if 'connection' in locals():
+                                connection.close()
+
         with Telegram_Client:
             Telegram_Client.loop.run_until_complete(main())
             executando.wait(timeout=5)
         print("[SISTEMA] Thread encerrada.")
+
 
 def start():
     """Inicia a thread se ela não estiver ativa."""
@@ -238,7 +330,8 @@ def stop():
     if thread_tarefa:
         thread_tarefa.join()
 
-if __nam    e__ == "__main__":
+
+if __name__ == "__main__":
     while True:
         comando = input("> ").strip().lower()
 

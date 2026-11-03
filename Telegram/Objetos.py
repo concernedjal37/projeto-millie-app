@@ -49,7 +49,7 @@ class Cotacao(BaseModel):
         print('Agencia: ', self.Agencia)
         print('Valor Médio Cotação: R$', self.Media)
         print('Montante Acumulado: ', self.Monte)
-        print('Última Atualização: ',
+        print('Vencimento: ',
               self.Data_Vencimento.strftime("%d/%m/%Y %H:%M"))
 
 # Classe de transferencia bonificada de milhas
@@ -68,7 +68,7 @@ class Transferencia_Bonificada(BaseModel):
         print('Destino: ', self.Destino)
         print('Porcentagem Alta: ', self.Porcent_High)
         print('Porcentagem Baixa: ', self.Porcent_Low)
-        print('Última Atualização: ',
+        print('Vencimento: ',
               self.Data_Vencimento.strftime("%d/%m/%Y %H:%M"))
         print('Informações da Promoção: ', self.link)
 
@@ -86,7 +86,7 @@ class Compra_Bonificada(BaseModel):
         print('--'*40 + '\nAgência / Plataforma: ', self.Agencia)
         print('Porcentagem Alta: ', self.Porcent_High)
         print('Porcentagem Baixa: ', self.Porcent_Low)
-        print('Última Atualização: ',
+        print('Vencimento: ',
               self.Data_Vencimento.strftime("%d/%m/%Y %H:%M"))
         print('Informações da Promoção: ', self.link)
 
@@ -102,6 +102,6 @@ class Adesao_Bonificada(BaseModel):
     def Print_Adesao(self):
         print('--'*40 + '\nAgência / Plataforma: ', self.Agencia)
         print('Milhas Bonificadas: ', self.Milhas)
-        print('Última Atualização: ',
+        print('Vencimento: ',
               self.Data_Vencimento.strftime("%d/%m/%Y %H:%M"))
         print('Informações da Promoção: ', self.link)
