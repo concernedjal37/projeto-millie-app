@@ -1,3 +1,4 @@
+#Comandos para a criação do banco por si só
 create database Banco_da_Millie;
 use Banco_da_Millie;
 
@@ -138,3 +139,25 @@ foreign key(id_rota) references rota(id)
 #drop table Oferta;
 
 #drop database Banco_da_Millie;
+
+#Componentes do banco de dados
+#	Procedures
+#Tenha em vista que essa sintaxe foi feita no mariadb
+DELIMITER //
+create procedure criar_cota(IN plat varchar(50), IN val float)
+begin
+declare repeticoes int;
+set repeticoes = (select count(*) from cotacoes where plataforma = plat);
+	if repeticoes = 0 then
+	#se a cotação não existe
+	insert into cotacoes (valor, plataforma) values (val, plat);
+	else
+	#se existe então troca para o novo valor caso sejá igual
+	update cotacoes set valor = val where plataforma = plat and valor != val;
+	end if;
+end //
+DELIMITER ;
+#call criar_cota(plataforma, valor);
+
+#Functions
+#Views
