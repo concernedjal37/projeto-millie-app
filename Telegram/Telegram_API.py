@@ -45,6 +45,7 @@ from pydantic import TypeAdapter
 from telethon import TelegramClient
 from telethon.tl.functions.channels import JoinChannelRequest
 from telethon import TelegramClient, events
+from telethon import utils
 from typing import Type, TypeVar
 from pydantic import BaseModel
 import Objetos
@@ -81,6 +82,8 @@ print('[INFO]Chaves de acesso estabelecidas.\n'+'*'*40)
 programa_ativo = threading.Event()
 # Manter a thread em standby enquanto não houver tarefas a serem executadas
 iniciar_trabalho = threading.Event()
+# Evento para parar o telethon 24/7
+evento_parar = threading.Event()
 # Salvar a referencia da thread para poder controlá-la (start, stop)
 thread_tarefa = None
 
@@ -186,17 +189,21 @@ async def executar_trabalho():
         print("[SISTEMA] Ciclo 24/7 iniciando...")
         print("[SISTEMA] Aguardando mensagem do Telegram chegar...")
         # Aguardando mensagens do Telegram (Período de Teste para melhorar resposta do Gemini)
-        Id_Canal_Cota = Telegram_Client.get_entity(Canal_Cota)
-        Id_Canal_Pronto_voar = Telegram_Client.get_entity(Canal_Pronto_voar)
-        Id_me = Telegram_Client.get_entity('me')
+        Entidade_Canal_Cota = await Telegram_Client.get_entity(Canal_Cota)
+        Entidade_Canal_Pronto_voar = await Telegram_Client.get_entity(Canal_Pronto_voar)
+        Entidade_me = await Telegram_Client.get_entity('me')
 
-        @Telegram_Client.on(events.NewMessage(chats=[Id_Canal_Cota, Canal_Pronto_voar, Id_me]))
+        id_cota = utils.get_peer_id(Entidade_Canal_Cota)
+        id_pronto_voar = utils.get_peer_id(Entidade_Canal_Pronto_voar)
+        id_me = utils.get_peer_id(Entidade_me)
+
+        @Telegram_Client.on(events.NewMessage(chats=[id_cota, id_pronto_voar, id_me]))
         async def handler(event):
-            print("[SISTEMA] Aguardando mensagens do Telegram...")
+            print("[SISTEMA] Mensagem recebida! traduzindo...")
 
             # Verificando de qual canal a mensagem veio
             # Canal de Cotações Milhas possui apenas mensagens sobre cotações de milhas
-            if event.chat_id == Id_Canal_Cota:
+            if event.chat_id == id_cota:
                 print("[SISTEMA] Nova mensagem de Cotação de Milhas recebida.")
                 mensagem_Cota = event.message.text
 
@@ -224,7 +231,7 @@ async def executar_trabalho():
                         cota.Print_Cota()
 
             # Canal Prontos para voar possui diversas promoções e propagandas diferentes
-            elif event.chat_id == Id_Canal_Pronto_voar:
+            elif event.chat_id == id_pronto_voar:
                 if 'Transferência bonificada' in event.message.text:
                     print(
                         "[SISTEMA] Nova mensagem de Transferência Bonificada recebida.")
@@ -299,10 +306,10 @@ async def executar_trabalho():
                         "[SISTEMA] Mensagem recebida, mas não corresponde a nenhuma categoria conhecida.")
 
             # Chat pessoal para testes dentro do fluxo 24/7
-            elif event.chat_id == Id_me:
+            elif event.chat_id == id_me:
                 print("[SISTEMA] Identificando tipo de mensagem enviada.")
                 await Telegram_Client.send_message('me', "Mensagem Recebida! Identificando tipo de promoção/cotção")
-                if "Balcao de Milhas" in event.message.text:
+                if "Milhas" in event.message.text:
                     print(
                         "[SISTEMA] Nova mensagem de Cotação de Milhas recebida.")
                     await Telegram_Client.send_message('me', "Identificado Modelo de cotação de milhas")
@@ -474,8 +481,16 @@ async def executar_trabalho():
         print("[AVISO]Opção escolhida não é válida. retornando ao standby do programa.")
 
 
-def vigiar_parada():
-    
+async def vigiar_parada():
+    # Fica rodando ENQUANTO programa_ativo estiver ligado (.set())
+    while programa_ativo.is_set():
+        await asyncio.sleep(0.5)
+
+  # Quando stop() chamar programa_ativo.clear(), ele cai aqui:
+    print("[SISTEMA] Sinal de parada recebido. Desconectando Telegram...")
+    await Telegram_Client.disconnect()
+
+
 def loop_trabalho():
     #
     print("[SISTEMA] Iniciando a thread de trabalho...")
@@ -511,14 +526,13 @@ def start():
     global thread_tarefa
 
     if thread_tarefa is None or not thread_tarefa.is_alive():
-        programa_ativo.set()  # Sinaliza que o programa está ativo
+        programa_ativo.set()  # Sinaliza que o programa está ativo (Liga o vigia)
 
         thread_tarefa = threading.Thread(
-            target=loop_trabalho,
-            name="Thread_Telegram_API",
-            daemon=True)
+            target=loop_trabalho, name="Thread_Telegram_API", daemon=True
+        )
         thread_tarefa.start()
-        print("[SISTEMA] Programa iniciado com sucesso."+"\n"*3)
+        print("[SISTEMA] Programa iniciado com sucesso." + "\n" * 3)
     else:
         print("[AVISO] A thread já está em execução.")
 
@@ -537,18 +551,20 @@ def stop():
         return
     print("[SISTEMA] Interrompendo execução do programa")
 
-    # Informa que a thread deve ser encerrada.
+    # 1. Informa que a thread deve ser encerrada (isso aciona o vigiar_parada no Telethon)
     programa_ativo.clear()
 
-    # Libera o wait(), caso a thread esteja em standby.
+    # 2. Libera o wait(), caso a thread esteja em standby
     iniciar_trabalho.set()
 
-    # Aguarda a thread terminar.
+    # 3. Aguarda a thread terminar e o Telethon desconectar com segurança
     thread_tarefa.join()
 
+    # 4. Reseta as flags e a thread para permitir um futuro 'start' limpo
+    iniciar_trabalho.clear()
     thread_tarefa = None
 
-    print("[SISTEMA] Programa Encerrado com sucesso."+"\n"*3)
+    print("[SISTEMA] Programa Encerrado com sucesso." + "\n" * 3)
 
 
 if __name__ == "__main__":
