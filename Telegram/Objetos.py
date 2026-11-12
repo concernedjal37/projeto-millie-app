@@ -40,18 +40,29 @@ from pydantic import BaseModel
 class Cotacao(BaseModel):
     Plataforma: str
     Agencia: str
-    Media: float
-    Data_Vencimento: datetime
+    Valor_min: float
+    Valor_max: float
+    Data: datetime
     Monte: str
 
     def Print_Cota(self):
         print('--'*40 + '\nPlataforma: ', self.Plataforma)
         print('Agencia: ', self.Agencia)
-        print('Valor Médio Cotação: R$', self.Media)
+        print('Valor Mínimo Cotação: R$', self.Valor_min)
+        print('Valor Máximo Cotação: R$', self.Valor_max)
         print('Montante Acumulado: ', self.Monte)
         print('Vencimento: ',
-              self.Data_Vencimento.strftime("%d/%m/%Y %H:%M"))
+              self.Data.strftime("%d/%m/%Y %H:%M"))
 
+    def toString(self):
+        return (
+            f'Plataforma: {self.Plataforma}\n'
+            f'Agencia: {self.Agencia}\n'
+            f'Valor Mínimo Cotação: R$ {self.Valor_min:.2f}\n'
+            f'Valor Máximo Cotação: R$ {self.Valor_max:.2f}\n'
+            f'Montante Acumulado: {self.Monte}\n'
+            f"Vencimento: {self.Data.strftime('%d/%m/%Y %H:%M')}"
+        )
 # Classe de transferencia bonificada de milhas
 
 
