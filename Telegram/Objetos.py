@@ -87,14 +87,14 @@ class Transferencia_Bonificada(BaseModel):
 # Classe de compra bonificada de milhas
 
 class Compra_Bonificada(BaseModel):
-    Agencia: str
+    Origem: str
     Porcent_High: float
     Porcent_Low: float
     Data_Vencimento: datetime
     link: str
 
     def Print_Compra(self):
-        print('--'*40 + '\nAgência / Plataforma: ', self.Agencia)
+        print('--'*40 + '\nAgência / Plataforma: ', self.Origem)
         print('Porcentagem Alta: ', self.Porcent_High)
         print('Porcentagem Baixa: ', self.Porcent_Low)
         print('Vencimento: ',
@@ -105,13 +105,13 @@ class Compra_Bonificada(BaseModel):
 # Classe de adesão bonificada à uma agencia ou plataforma
 
 class Adesao_Bonificada(BaseModel):
-    Agencia: str
+    Origem: str
     Milhas: int
     Data_Vencimento: datetime
     link: str
 
     def Print_Adesao(self):
-        print('--'*40 + '\nAgência / Plataforma: ', self.Agencia)
+        print('--'*40 + '\nAgência / Plataforma: ', self.Origem)
         print('Milhas Bonificadas: ', self.Milhas)
         print('Vencimento: ',
               self.Data_Vencimento.strftime("%d/%m/%Y %H:%M"))

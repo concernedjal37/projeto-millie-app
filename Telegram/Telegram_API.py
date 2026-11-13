@@ -12,7 +12,7 @@ Analista QA e Administradora: Bruna Santiago
 **__**
 Arquivo: Teste_1.py
 Descrição:
- 
+
 EMPRESA:       [Millie Tecnologies]
 SISTEMA:       [Millie App - Desenvolvimento de Software]
 MÓDULO:        []
@@ -26,8 +26,8 @@ DESCRIÇÃO:  [Este arquivo contém as funções principais da integração]
 AUTOR:         [Lamoni Leal Pereira] <lamoni.pereira@sga.pucminas.br>
 DATA CRIAÇÃO:  [09/09/2026]
 --------------------------------------------------------------------------
-DIREITOS:      (c) Copyright [2026] - [Millie Tecnologies]. 
-               Todos os direitos reservados. Este código é confidencial e 
+DIREITOS:      (c) Copyright [2026] - [Millie Tecnologies].
+               Todos os direitos reservados. Este código é confidencial e
                propriedade interna da empresa.
 ==========================================================================
 ----------  --------------  -------  -------------------------------------
@@ -68,9 +68,14 @@ print(' Variáveis de ambiente carregadas com sucesso.\n'+'*'*40)
 
 print('[SISTEMA] Estabelecendo chaves de acesso...')
 # Aplicando Chaves de API do Telegram
-Telegram_Client = TelegramClient(
+"""Telegram_Client = TelegramClient(
     "session_name", TELEGRAM_API_ID, TELEGRAM_API_HASH)
+"""
 limit = 1
+# 1. Faz o login/validação fora das funções (na Thread Principal)
+with TelegramClient('session_millie_API', TELEGRAM_API_ID, TELEGRAM_API_HASH) as client_login:
+    print("[SISTEMA] Login do Telegram validado com sucesso!")
+# Ao sair do 'with', o client_login desconecta e libera o arquivo .session automaticamente!
 
 # Aplicando Chave de API do Gemini
 Gemini_Client = genai.Client(api_key=GEMINI_API_KEY)
@@ -109,26 +114,35 @@ async def Procura_mensagem(Telegram_Client, Canal, limit, Palavra):
 
 
 def Prompt_Gemini_Cotacao(Prompt: str):
-    print('Enviando Prompt para o Gemini...\nAguarde a resposta...')
-    try:
-        response = Gemini_Client.chats.create(
-            model='gemini-3.5-flash-lite').send_message(
-            message=Prompt,
-            config={
-                "response_mime_type": "application/json",
-                "response_schema": list[Objetos.Cotacao]
-            }
-        )
+    print('[SISTEMA] Iniciando Prompt_Gemini_Cotacao...')
+    count = 1
+    while count <= 5:
+        print(
+            f'[SISTEMA] Tentativa {count}/ 5 para enviar o Prompt ao Gemini.')
+        print('Enviando Prompt para o Gemini...\nAguarde a resposta...')
+        try:
+            response = Gemini_Client.chats.create(
+                model='gemini-3.5-flash-lite').send_message(
+                message=Prompt,
+                config={
+                    "response_mime_type": "application/json",
+                    "response_schema": list[Objetos.Cotacao]
+                }
+            )
 
-        print('[SISTEMA] Resposta recebida do Gemini.\n')
-        # Retornando a resposta do Gemini como um objeto Cotacao
-        adapter = TypeAdapter(list[Objetos.Cotacao])
-        return adapter.validate_json(response.text)
+            print('[SISTEMA] Resposta recebida do Gemini.\n')
+            # Retornando a resposta do Gemini como um objeto Cotacao
+            adapter = TypeAdapter(list[Objetos.Cotacao])
+            return adapter.validate_json(response.text)
 
-    except Exception as e:
-        print('[SISTEMA] Erro na conexão com o Gemini ou na validação do JSON:')
-        print(e)
-        return None
+        except Exception as e:
+            print('[SISTEMA] Erro na conexão com o Gemini ou na validação do JSON:')
+            print(e)
+            if count == 5:
+                print(
+                    '[SISTEMA] Número máximo de tentativas atingido. Falha ao enviar o Prompt ao Gemini.')
+                return None
+            count += 1
 
 
 def Prompt_Gemini_Promocao(Prompt: str, Schema: Type[T]) -> T | None:
@@ -152,7 +166,100 @@ def Prompt_Gemini_Promocao(Prompt: str, Schema: Type[T]) -> T | None:
         return None
 
 
-async def executar_trabalho():
+def Salvar_Cotacao_BD(cotacao: Objetos.Cotacao):
+    try:
+        connection = mariadb.connect(
+            host="100.79.171.116",
+            port=3306,
+            database="Banco_da_Millie",
+            user="java_user",
+            password="50BMG"
+        )
+        cursor = connection.cursor()
+
+        # Query SQL com placeholders (?)
+        sql = """
+
+                    call criar_cota(%s, %s, %s, %s);
+                """
+        cursor.execute(sql, (
+            cotacao.Plataforma,
+            cotacao.Valor_min,
+            cotacao.Valor_max,
+            cotacao.Agencia
+        ))
+        connection.commit()
+    except mariadb.Error as e:
+        print(
+            f"[ERRO] Erro ao salvar dados no banco de dados: {e}")
+    finally:
+        if 'connection' in locals():
+            connection.close()
+
+
+def Salvar_Promocao_BD(promocao: any):
+    try:
+        connection = mariadb.connect(
+            host="100.79.171.116",
+            port=3306,
+            database="Banco_da_Millie",
+            user="java_user",
+            password="50BMG"
+        )
+        cursor = connection.cursor()
+
+        # Query SQL com placeholders (?)
+        if isinstance(promocao, Objetos.Transferencia_Bonificada):
+            sql = """   
+                    call criar_promocao(%s, %s, %s, %s, %s, %s, 1);
+                """
+            cursor.execute(sql, (
+                promocao.Origem,
+                promocao.Destino,
+                promocao.Porcent_High,
+                promocao.Porcent_Low,
+                promocao.Data_Vencimento,
+                promocao.link
+            ))
+        elif isinstance(promocao, Objetos.Compra_Bonificada):
+            sql = """   
+                    call criar_promocao(%s, %s, %s, %s, %s, 2);
+                """
+            cursor.execute(sql, (
+                promocao.Origem,
+                promocao.Porcent_High,
+                promocao.Porcent_Low,
+                promocao.Data_Vencimento,
+                promocao.link
+            ))
+        elif isinstance(promocao, Objetos.Adesao_Bonificada):
+            sql = """   
+                    call criar_promocao(%s, %s, %s, %s, 3);
+                """
+            cursor.execute(sql, (
+                promocao.Origem,
+                promocao.Milhas,
+                promocao.Data_Vencimento,
+                promocao.link
+            ))
+        connection.commit()
+    except mariadb.Error as e:
+        print(
+            f"[ERRO] Erro ao salvar dados no banco de dados: {e}")
+    finally:
+        if 'connection' in locals():
+            connection.close()
+
+
+async def executar_trabalho(Telegram_Client):
+    print("[SISTEMA] Conectando ao Telegram...")
+    await Telegram_Client.connect()
+    if not await Telegram_Client.is_user_authorized():
+        print('[ERRO] Sessão não autenticada! Rode o login uma vez fora da thread.')
+        return
+
+    print('[SISTEMA] Conectado com sucesso! Entrando nos canais...')
+
     # Instanciando os Link dos canais do Telegram
     Canal_Cota = 'https://t.me/cotacoes'
     Canal_Pronto_voar = 'https://t.me/canalpontospravoar'
@@ -183,8 +290,27 @@ async def executar_trabalho():
     Palavra_Procura = 'Adesão'
     mensagem_Adesao = await Procura_mensagem(Telegram_Client, Canal_Pronto_voar, limit, Palavra_Procura)
 
+    # Salvando dados Default de Cotação de Milhas no banco de dados
+    if mensagem_Cota is not None:
+        Prompt = (
+            "Instruções para extrair dados da mensagem a seguir:\n"
+            "1. Plataforma: Nome da plataforma de venda de milhas (Balcao de milhas, Hotmilhas, etc.)\n"
+            "2. Origem: Nome da agencia ou plataforma de milhas (ex: Smiles, Latam Pass, TudoAzul, etc.)\n"
+            "3. Valor mínimo: Valor mínimo da cotação\n"
+            "4. Valor máximo: Valor máximo da cotação\n"
+            "5. Data: Data da mensagem (ex: 01/01/2024)\n"
+            "6. Moeda: Moeda da cotação (ex: BRL, USD, EUR, etc.)\n\n"
+        ) + mensagem_Cota.text
+        Resposta: list[Objetos.Cotacao] = Prompt_Gemini_Cotacao(Prompt)
+        if Resposta is not None:
+            for cota in Resposta:
+                cota.Print_Cota()
+                print(
+                    "[SISTEMA] Salvando dados de Cotação de Milhas no banco de dados...")
+                Salvar_Cotacao_BD(cota)
+
     selecao = input(
-        "Escolha 'menu' de testes ou 'prog' para iniciar o programa 24/7 'Aguardando mensagens do Telegram'")
+        "Escolha 'menu' de testes ou 'prog' para iniciar o programa 24/7 'Aguardando mensagens do Telegram':\n").strip().lower()
     if selecao == 'prog':
         print("[SISTEMA] Ciclo 24/7 iniciando...")
         print("[SISTEMA] Aguardando mensagem do Telegram chegar...")
@@ -307,15 +433,14 @@ async def executar_trabalho():
 
             # Chat pessoal para testes dentro do fluxo 24/7
             elif event.chat_id == id_me:
-                print("[SISTEMA] Identificando tipo de mensagem enviada.")
+                print("[SISTEMA] Fonte: Chat Pessoal.\n" + "*"*40)
                 await Telegram_Client.send_message('me', "Mensagem Recebida! Identificando tipo de promoção/cotção")
                 if "Milhas" in event.message.text:
                     print(
                         "[SISTEMA] Nova mensagem de Cotação de Milhas recebida.")
-                    await Telegram_Client.send_message('me', "Identificado Modelo de cotação de milhas")
+                    await Telegram_Client.send_message(id_me, "Identificado Modelo de cotação de milhas")
 
                     mensagem_Cota = event.message.text
-
                     # Perguntando ao Gemini sobre Cotação de milhas
                     Instruções_Cota = (
                         "Instruções para extrair dados da mensagem a seguir:\n"
@@ -327,29 +452,44 @@ async def executar_trabalho():
                         "6. Moeda: Moeda da cotação (ex: BRL, USD, EUR, etc.)\n\n"
                     )
 
-                    Prompt = Instruções_Cota + mensagem_Cota.text
+                    Prompt: str = Instruções_Cota + mensagem_Cota
+                    print("[SISTEMA] Prompt gerado para o Gemini:\n" + Prompt)
+
                     Resposta: list[Objetos.Cotacao] = Prompt_Gemini_Cotacao(
                         Prompt)
-                    await Telegram_Client.send_message('me', "Mensagem traduzida para JSON")
+                    print("[SISTEMA] Resposta do Gemini recebida:\n")
+
+                    await Telegram_Client.send_message(id_me, "Mensagem traduzida para JSON")
                     for cota in Resposta:
                         cota.Print_Cota()
                         cota_menssagem_telegram = cota.toString()
-                        await Telegram_Client.send_message('me', cota_menssagem_telegram)
+                        await Telegram_Client.send_message(id_me, cota_menssagem_telegram)
+                    for cota in Resposta:
+                        Salvar_Cotacao_BD(cota)
 
+                # 1. Define as duas funções primeiro
         async def aviso_periodico():
             while True:
                 print('[SISTEMA] Aguardando mensagem do Telegram chegar...')
-                await asyncio.sleep(20)  # Pausa assíncrona de 20 segundos
+                await asyncio.sleep(120)
 
-        # Inicia o aviso periódico em segundo plano
+        async def vigiar_parada():
+            while programa_ativo.is_set():
+                await asyncio.sleep(0.5)
+            print('[SISTEMA] Sinal de parada recebido. Desconectando Telegram...')
+            await Telegram_Client.disconnect()
+
+        # 2. Inicia as duas tarefas juntas
         tarefa_aviso = asyncio.create_task(aviso_periodico())
+        tarefa_vigia = asyncio.create_task(vigiar_parada())
 
+        # 3. Roda o Telegram 24/7 apenas UMA vez
         try:
-            # 4. Mantém o código aguardando mensagens 24/7 até ser desconectado/parado
             await Telegram_Client.run_until_disconnected()
         finally:
-            # Cancela o aviso de 20s quando o programa for encerrado
             tarefa_aviso.cancel()
+            tarefa_vigia.cancel()
+            print('[SISTEMA] Programa 24/7 encerrado...')
 
     elif selecao == 'menu':
         while True:
@@ -481,44 +621,39 @@ async def executar_trabalho():
         print("[AVISO]Opção escolhida não é válida. retornando ao standby do programa.")
 
 
-async def vigiar_parada():
-    # Fica rodando ENQUANTO programa_ativo estiver ligado (.set())
-    while programa_ativo.is_set():
-        await asyncio.sleep(0.5)
-
-  # Quando stop() chamar programa_ativo.clear(), ele cai aqui:
-    print("[SISTEMA] Sinal de parada recebido. Desconectando Telegram...")
-    await Telegram_Client.disconnect()
-
-
 def loop_trabalho():
-    #
     print("[SISTEMA] Iniciando a thread de trabalho...")
+
+    # Cria e define um loop assíncrono exclusivo para esta thread
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
     while programa_ativo.is_set():
         print("[SISTEMA] Aguardando sinal para iniciar o trabalho")
-
-        # Aguarda até que a thread seja sinalizada para iniciar o trabalho
         iniciar_trabalho.wait()
 
         if not programa_ativo.is_set():
-            break  # Sai do loop se o programa não estiver mais ativo
+            break
 
         print("[SISTEMA] Comando start recebido.")
         try:
-
-            with Telegram_Client:
-                Telegram_Client.loop.run_until_complete(executar_trabalho())
+            # Instancia o cliente DENTRO da thread para não haver conflito de loop
+            Telegram_Client = TelegramClient(
+                "session_millie_API", TELEGRAM_API_ID, TELEGRAM_API_HASH, loop=loop)
+            loop.run_until_complete(executar_trabalho(Telegram_Client))
 
         except Exception as e:
             print(
                 f"[ERRO] Ocorreu um erro durante a execução do trabalho: {e}")
 
         finally:
-            iniciar_trabalho.clear()    # Reseta o evento para aguardar o próximo start
+            iniciar_trabalho.clear()
             print("[SISTEMA] Telegram Client desconectado.")
-            print("[SISTEMA] Trabalho concluído." + "*"*40)
-            print("[SISTEMA] Sistema retornando ao estado de Standby" + "*"*40)
-    print("[SITEMA] Programa encerrando definitivamente.\n"+"="*40)
+            print("[SISTEMA] Trabalho concluído." + "*" * 40)
+            print("[SISTEMA] Sistema retornando ao estado de Standby" + "*" * 40)
+
+    loop.close()
+    print("[SISTEMA] Programa encerrando definitivamente.\n" + "=" * 40)
 
 
 def start():
