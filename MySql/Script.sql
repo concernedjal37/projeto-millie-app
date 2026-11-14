@@ -1,3 +1,4 @@
+#Se você quiser criar o banco todo de uma vez compilando todas as linhas infelizmente será necessario você ler um dos comentarios localizado na linha 160. Se estiver no vscode utilize Crtl + G para ir deretamente para a linha
 #Comandos para a criação do banco por si só
 create database Banco_da_Millie;
 use Banco_da_Millie;
@@ -140,8 +141,6 @@ foreign key(id_rota) references rota(id)
 )ENGINE = InnoDB;
 #drop table Oferta;
 
-#drop database Banco_da_Millie;
-
 #Tabela para informar erros aos programadores
 create table log_operacoes(
 id int primary key not null auto_increment,
@@ -154,9 +153,11 @@ variavel_5 varchar(10)
 )ENGINE = InnoDB;
 #drop table log_operacoes;
 
+#drop database Banco_da_Millie;
+
 #Componentes do banco de dados
 #	Procedures
-#Tenha em vista que essa sintaxe foi feita no mariadb
+#Tenha em vista que essa sintaxe foi feita no mariadb então não ira funcionar tudo de uma vez(no caso compilar todas as linhas) a partir daqui!
 #Criar cotações
 DELIMITER //
 create procedure criar_cota(IN plat varchar(50), IN val_min float, IN val_max float, IN agen varchar(20))
@@ -164,15 +165,15 @@ begin
 declare repeticoes int;
 set repeticoes = (select count(*) from cotacoes where agencia = agen);
 	if repeticoes = 0 then
-	#se a cotação não existe
-	insert into cotacoes (valor_min, plataforma, valor_max, agencia) values (val_min, plat, val_max, agen);
+		#se a cotação não existe
+		insert into cotacoes (valor_min, plataforma, valor_max, agencia) values (val_min, plat, val_max, agen);
 	else
-	#se existe então troca para o novo valor caso sejá igual
-	update cotacoes set valor_min = val_min, valor_max = val_max where plataforma = plat and valor_min != val_min and valor_max != val_max;
+		#se existe então troca para o novo valor caso sejá igual
+		update cotacoes set valor_min = val_min, valor_max = val_max where plataforma = plat and valor_min != val_min and valor_max != val_max;
 	end if;
 end //
 DELIMITER ;
-#call criar_cota(plataforma, valor);
+#call criar_cota(plataforma, valor minimo, valor maximo, agencia);
 #drop procedure criar_cota;
 
 #Criar promoções
@@ -185,44 +186,42 @@ in quant_milhas int default 0
 begin
 declare novo_id int;
 if codigo_verificacao not between 1 and 3 then
-#Caso o código esteja errado
-insert into log_operacoes(descricao_acao) values('Erro: Código Back_End digitou o código errado');
-select descricao_acao from log_operacoes;
+	#Caso o código esteja errado
+	insert into log_operacoes(descricao_acao) values('Erro: Código Back_End digitou o código errado');
+	select descricao_acao from log_operacoes;
 else
-#Insere a promoção
-insert into Promocoes(link, status_gerais, plataforma_de_origem) values(link, status_gerais, plataforma_de_origem);
-#Pega o id
-set novo_id = (select id from Promocoes order by id desc limit 1);
-#Switch case de chernobyl
-case codigo_verificacao
-#Transferencia Bonificada
-when 1 then
-insert into Transferencia_bonificada(id_promocoes, plataforma_de_destino, percentual_MAX, percentual_MIN) values(novo_id, plat_destino, percent_max, percent_min);
-#Insere no Log para informar da operação
-insert into log_operacoes(descricao_acao) values('Operação de inserção de Transferencia Bonificada feita');
-select descricao_acao from log_operacoes;
-#Compra Bonificada
-when 2 then
-insert into Compra_bonificada(id_promocoes, percentual_MAX, percentual_MIN) values(novo_id, percent_max, percent_min);
-#Insere no Log para informar da operação
-insert into log_operacoes(descricao_acao) values('Operação de inserção de Compra Bonificada feita');
-select descricao_acao from log_operacoes;
-#Adesão Bonificada
-when 3 then
-insert into Adesao_bonificada(id_promocoes, quantidade_milhas) values(novo_id, quant_milhas);
-#Insere no Log para informar da operação
-insert into log_operacoes(descricao_acao) values('Operação de inserção de Adesão Bonificada feita');
-select descricao_acao from log_operacoes;
-end case;
+	#Insere a promoção
+	insert into Promocoes(link, status_gerais, plataforma_de_origem) values(link, status_gerais, plataforma_de_origem);
+	#Pega o id
+	set novo_id = (select id from Promocoes order by id desc limit 1);
+	#Switch case de chernobyl
+	case codigo_verificacao
+		#Transferencia Bonificada
+		when 1 then
+			insert into Transferencia_bonificada(id_promocoes, plataforma_de_destino, percentual_MAX, percentual_MIN) values(novo_id, plat_destino, percent_max, percent_min);
+			#Insere no Log para informar da operação
+			insert into log_operacoes(descricao_acao) values('Operação de inserção de Transferencia Bonificada feita');
+		#Compra Bonificada
+		when 2 then
+			insert into Compra_bonificada(id_promocoes, percentual_MAX, percentual_MIN) values(novo_id, percent_max, percent_min);
+			#Insere no Log para informar da operação
+			insert into log_operacoes(descricao_acao) values('Operação de inserção de Compra Bonificada feita');
+		#Adesão Bonificada
+		when 3 then
+			insert into Adesao_bonificada(id_promocoes, quantidade_milhas) values(novo_id, quant_milhas);
+			#Insere no Log para informar da operação
+			insert into log_operacoes(descricao_acao) values('Operação de inserção de Adesão Bonificada feita');
+			end case;
 end if;
 end //
 DELIMITER ;
-#Melhore depois
-#call adicionar_promo('akljfbsjkdjk', 'Smiles', 3);
 #drop procedure adicionar_promo;
+#Eu darei um exemplo de uso melhor depois, ainda não sei com total certeza como funciona os argumentos opcionais e eles ainda precisam de uma configuração melhor talvez
+#call adicionar_promo('akljfbsjkdjk', 'Smiles', 3);
 
 #Functions
-#Views
+#Não criado ainda
+#	Views
 #View para visualização melhor dos desenvolvedores(ou talvez poderia ser utilizado de outras formas também) em relação a todos os dados de um tipo.
 create or replace view Verificar_Transferencia_Boni as select * from Promocoes join Transferencia_bonificada on id = id_promocoes;
 #select * from Verificar_Transferencia_Boni;
