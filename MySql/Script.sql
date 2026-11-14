@@ -53,7 +53,7 @@ foreign key(id_cotacoes) references cotacoes(id)
 create table Promocoes(
 id int unsigned primary key not null auto_increment,
 link varchar(500) not null,
-status_gerais varchar(20),
+data_limite datetime not null,
 plataforma_de_origem varchar(20) not null
 )ENGINE = InnoDB;
 #drop table Promocoes;
@@ -179,7 +179,7 @@ DELIMITER ;
 #Criar promoções
 DELIMITER //
 create procedure adicionar_promo(
-in link varchar(500), in plataforma_de_origem varchar(20), in codigo_verificacao tinyint, in status_gerais varchar(20) default null,
+in link varchar(500), in plataforma_de_origem varchar(20), in data_limite datetime, in codigo_verificacao tinyint,
 in plat_destino varchar(20) default 'ND', in percent_max float default 0, in percent_min float default 0,
 in quant_milhas int default 0
 )
@@ -191,7 +191,7 @@ if codigo_verificacao not between 1 and 3 then
 	select descricao_acao from log_operacoes;
 else
 	#Insere a promoção
-	insert into Promocoes(link, status_gerais, plataforma_de_origem) values(link, status_gerais, plataforma_de_origem);
+	insert into Promocoes(link, data_limite, plataforma_de_origem) values(link, data_limite, plataforma_de_origem);
 	#Pega o id
 	set novo_id = (select id from Promocoes order by id desc limit 1);
 	#Switch case de chernobyl
@@ -217,7 +217,7 @@ end //
 DELIMITER ;
 #drop procedure adicionar_promo;
 #Eu darei um exemplo de uso melhor depois, ainda não sei com total certeza como funciona os argumentos opcionais e eles ainda precisam de uma configuração melhor talvez
-#call adicionar_promo('akljfbsjkdjk', 'Smiles', 3);
+#call adicionar_promo('akljfbsjkdjk', 'Smiles', data e hora,3);
 
 #Functions
 #Não criado ainda
