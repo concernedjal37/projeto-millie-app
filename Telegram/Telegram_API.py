@@ -370,7 +370,7 @@ async def executar_trabalho(Telegram_Client):
             Salvar_Promocao_BD(Resposta)
     except Exception as e:
         print(f"[ERRO] Erro no Scraping: {e}")
-
+    print("Aperte Enter para continuar")
     # selecionando como vai rodar o programa, em Menu de opções para testar perguntas ao Gemini e BD ou Programa 24/7 padrão
     selecao = input(
         "Escolha 'menu' de testes ou 'prog' para iniciar o programa 24/7 'Aguardando mensagens do Telegram':\n").strip().casefold()
