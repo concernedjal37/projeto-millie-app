@@ -34,7 +34,6 @@ DIREITOS:      (c) Copyright [2026] - [Millie Tecnologies].
 """
 
 import asyncio
-from http import client
 import json
 import os
 import time
@@ -94,6 +93,8 @@ thread_tarefa = None
 
 T = TypeVar('T', bound=BaseModel)
 
+# Função para entrar nos canais do telegram
+
 
 async def Entrar_Canal(Telegram_Client, Canal):
     print('Entrando no Canal: ', Canal)
@@ -104,6 +105,8 @@ async def Entrar_Canal(Telegram_Client, Canal):
         print(f"falha ao entrar no Canal {Canal}")
         # print(f"Erro: {e}")
 
+# Função para pesquisar as mensagens dentro do canal do telegram
+
 
 async def Procura_mensagem(Telegram_Client, Canal, limit, Palavra):
     print('Procurando mensagem...')
@@ -111,6 +114,8 @@ async def Procura_mensagem(Telegram_Client, Canal, limit, Palavra):
         print(f'Mensagem encontrada.' + '*'*40 + '\n')
         if message.text:
             return message
+
+# Função para requisitar ao Gemini estruturação da mensagem em JSON (Exclusivo para cotação)
 
 
 def Prompt_Gemini_Cotacao(Prompt: str):
@@ -144,6 +149,8 @@ def Prompt_Gemini_Cotacao(Prompt: str):
                 return None
             count += 1
 
+# Função para requisitar ao Gemini estruturação da mensagem em JSON (Todo tipo de promoção)
+
 
 def Prompt_Gemini_Promocao(Prompt: str, Schema: Type[T]) -> T | None:
     print('Enviando Prompt para o Gemini...\nAguarde a resposta...')
@@ -164,6 +171,8 @@ def Prompt_Gemini_Promocao(Prompt: str, Schema: Type[T]) -> T | None:
         print("Erro na conexão com o Gemini ou na validação do JSON:")
         print(e)
         return None
+
+# Salvando dados de Cotação dentro do banco de dados
 
 
 def Salvar_Cotacao_BD(cotacao: Objetos.Cotacao):
@@ -196,9 +205,13 @@ def Salvar_Cotacao_BD(cotacao: Objetos.Cotacao):
         if 'connection' in locals():
             connection.close()
 
+# Salvando dados de qualquer promoção dentro do banco de dados
+
 
 def Salvar_Promocao_BD(promocao: any):
     try:
+        tipo = type(promocao).__name__
+        print(f"[SISTEMA] Salvando promoção de {tipo} no banco de dados")
         connection = mariadb.connect(
             host="100.79.171.116",
             port=3306,
@@ -207,42 +220,37 @@ def Salvar_Promocao_BD(promocao: any):
             password="50BMG"
         )
         cursor = connection.cursor()
-
+        if tipo == 'Transferencia_Bonificada':
+            cod_tipo = 1
+        elif tipo == 'Compra_Bonificada':
+            cod_tipo = 2
+        elif tipo == 'Adesao_Bonificada':
+            cod_tipo = 3
+        else:
+            print(f"[ERRO] Tipo de promoção desconhecido: {tipo}")
+            return
         # Query SQL com placeholders (?)
-        if isinstance(promocao, Objetos.Transferencia_Bonificada):
-            sql = """   
-                    call criar_promocao(%s, %s, %s, %s, %s, %s, 1);
-                """
-            cursor.execute(sql, (
-                promocao.Origem,
-                promocao.Destino,
-                promocao.Porcent_High,
-                promocao.Porcent_Low,
-                promocao.Data_Vencimento,
-                promocao.link
-            ))
-        elif isinstance(promocao, Objetos.Compra_Bonificada):
-            sql = """   
-                    call criar_promocao(%s, %s, %s, %s, %s, 2);
-                """
-            cursor.execute(sql, (
-                promocao.Origem,
-                promocao.Porcent_High,
-                promocao.Porcent_Low,
-                promocao.Data_Vencimento,
-                promocao.link
-            ))
-        elif isinstance(promocao, Objetos.Adesao_Bonificada):
-            sql = """   
-                    call criar_promocao(%s, %s, %s, %s, 3);
-                """
-            cursor.execute(sql, (
-                promocao.Origem,
-                promocao.Milhas,
-                promocao.Data_Vencimento,
-                promocao.link
-            ))
+        sql = """   
+                call adicionar_promo(%s, %s, %s, %s, %s, %s, %s, %s);
+            """
+        cursor.execute(sql, (
+            promocao.link,
+            promocao.Origem,
+            promocao.Data_Vencimento,
+            cod_tipo,
+            promocao.Destino if type(
+                promocao).__name__ == 'Transferencia_Bonificada' else None,
+            promocao.Porcent_High if type(
+                promocao).__name__ != 'Adesao_Bonificada' else None,
+            promocao.Porcent_Low if type(
+                promocao).__name__ != 'Adesao_Bonificada' else None,
+            promocao.Milhas if type(
+                promocao).__name__ == 'Adesao_Bonificada' else None
+
+
+        ))
         connection.commit()
+        print("[SISTEMA] Dados enviados com sucesso")
     except mariadb.Error as e:
         print(
             f"[ERRO] Erro ao salvar dados no banco de dados: {e}")
@@ -251,16 +259,22 @@ def Salvar_Promocao_BD(promocao: any):
             connection.close()
 
 
+"""Essa função Executa todos os trabalhos necessários para extração de dados do Telegram seja para testes ou execução 24/7
+Função é executada apenas quando a thread responsável é ativada "start" digitado no terminal"""
+
+
 async def executar_trabalho(Telegram_Client):
+    # O programa está todo anexado com degubs para verificar atualização do programa em tempo real
     print("[SISTEMA] Conectando ao Telegram...")
+    # A sessão do telegram já foi criada anteriormente, logo nesse comando somente se faz necessário conectar a sessão que foi iniciada
     await Telegram_Client.connect()
+    # Verificação caso houver erro de conexão
     if not await Telegram_Client.is_user_authorized():
         print('[ERRO] Sessão não autenticada! Rode o login uma vez fora da thread.')
         return
-
     print('[SISTEMA] Conectado com sucesso! Entrando nos canais...')
 
-    # Instanciando os Link dos canais do Telegram
+    # Instanciando os Link dos canais do Telegram é possível tem muito mais que apenas dois, por equanto estamos limitando apenas a esses
     Canal_Cota = 'https://t.me/cotacoes'
     Canal_Pronto_voar = 'https://t.me/canalpontospravoar'
 
@@ -268,61 +282,114 @@ async def executar_trabalho(Telegram_Client):
     await Entrar_Canal(Telegram_Client, Canal_Cota)
     await Entrar_Canal(Telegram_Client, Canal_Pronto_voar)
 
+    # Pesquisa inicial das promoções e cotações iniciais
     print(
         '*'*40 + 'Coletando dados iniciais, primeiro acesso aos canais do Telegram...')
+
     # Coletando última mensagem de Cotação de milhas
     print('Coletando última mensagem de Cotação de milhas')
-    Palavra_Procura = 'Balcão de milhas'
+    Palavra_Procura = 'balcão de milhas'
     mensagem_Cota = await Procura_mensagem(Telegram_Client, Canal_Cota, limit, Palavra_Procura)
+    Prompt = (
+        "Instruções para extrair dados da mensagem a seguir:\n"
+        "1. Plataforma: Nome da plataforma de venda de milhas (Balcao de milhas, Hotmilhas, etc.)\n"
+        "2. Agencia: Nome da agencia de milhas (ex: Smiles, Latam Pass, TudoAzul, etc.)\n"
+        "3. Valor mínimo: Valor mínimo da cotação\n"
+        "4. Valor máximo: Valor máximo da cotação\n"
+        "5. Data: Data da mensagem (ex: 01/01/2024)\n"
+        "6. Moeda: Moeda da cotação (ex: BRL, USD, EUR, etc.)\n\n"
+    ) + mensagem_Cota.text
+    # Solicitando Resposta do Gemini
+    Resposta: list[Objetos.Cotacao] = Prompt_Gemini_Cotacao(Prompt)
+    # Imprimindo e salvando valores de cotação
+    if Resposta is not None:
+        for cota in Resposta:
+            cota.Print_Cota()
+            Salvar_Cotacao_BD(cota)
 
     # Coletando última mensagem de Transferência Bonificada
     print('Coletando última mensagem de Transferência Bonificada')
-    Palavra_Procura = 'Transferência bonificada'
-    mensagem_Transf = await Procura_mensagem(Telegram_Client, Canal_Pronto_voar, limit, Palavra_Procura)
 
-    # Coletando última mensagem de Compra Bonificada
-    print('Coletando última mensagem de Compra Bonificada')
-    Palavra_Procura = 'Comprar milhas'
-    mensagem_Compra = await Procura_mensagem(Telegram_Client, Canal_Pronto_voar, limit, Palavra_Procura)
-
-    # Coletando última mensagem de Adesão a Clube Bonificada
-    print('Coletando última mensagem de Adesão a Clube Bonificada')
-    Palavra_Procura = 'Adesão'
-    mensagem_Adesao = await Procura_mensagem(Telegram_Client, Canal_Pronto_voar, limit, Palavra_Procura)
-
-    # Salvando dados Default de Cotação de Milhas no banco de dados
-    if mensagem_Cota is not None:
+    try:
+        Palavra_Procura = 'transferência bonificada'
+        mensagem_Transf = await Procura_mensagem(Telegram_Client, Canal_Pronto_voar, limit, Palavra_Procura)
         Prompt = (
             "Instruções para extrair dados da mensagem a seguir:\n"
-            "1. Plataforma: Nome da plataforma de venda de milhas (Balcao de milhas, Hotmilhas, etc.)\n"
-            "2. Origem: Nome da agencia ou plataforma de milhas (ex: Smiles, Latam Pass, TudoAzul, etc.)\n"
-            "3. Valor mínimo: Valor mínimo da cotação\n"
-            "4. Valor máximo: Valor máximo da cotação\n"
-            "5. Data: Data da mensagem (ex: 01/01/2024)\n"
-            "6. Moeda: Moeda da cotação (ex: BRL, USD, EUR, etc.)\n\n"
-        ) + mensagem_Cota.text
-        Resposta: list[Objetos.Cotacao] = Prompt_Gemini_Cotacao(Prompt)
+            "Origem: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.)"
+            "caso haja vários add diversos + o tipo (banco, agencia etc.)\n"
+            "Destino: Nome da agencia de milhas de destino (ex: Smiles, Latam Pass, etc.)"
+            "caso haja vários add diversos + o tipo (banco, agencia etc.)\n"
+            "Porcent_high: Porcentagem máxima da bonificação\n"
+            "Porcent_Low: Porcentagem mínima da bonificação\n"
+            "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
+            "link: Link para acessar a promoção\n"
+            "Sempre acessar o link da promoção para confirmar os detalhes \n\n") + mensagem_Transf.text
+        # Extraindo tipo de estrutura necessária para o Gemini enviar a Resposta
+        schema = Objetos.Transferencia_Bonificada
+        # Solicitando Resposta do Gemini
+        Resposta = Prompt_Gemini_Promocao(Prompt, schema)
         if Resposta is not None:
-            for cota in Resposta:
-                cota.Print_Cota()
-                print(
-                    "[SISTEMA] Salvando dados de Cotação de Milhas no banco de dados...")
-                Salvar_Cotacao_BD(cota)
+            Resposta.Print_Transf()
+            Salvar_Promocao_BD(Resposta)
 
+        # Coletando última mensagem de Compra Bonificada
+        print('Coletando última mensagem de Compra Bonificada')
+        Palavra_Procura = 'comprar pontos'
+        mensagem_Compra = await Procura_mensagem(Telegram_Client, Canal_Pronto_voar, limit, Palavra_Procura)
+        Prompt = (
+            "Instruções para extrair dados da mensagem a seguir:\n"
+            "Agencia: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.), caso houver vários usar palavra diversos\n"
+            "Porcent_high: Porcentagem máxima da bonificação\n"
+            "Porcent_Low: Porcentagem mínima da bonificação\n"
+            "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
+            "link: Link para acessar a promoção\n"
+            "Sempre acessar o link da promoção para confirmar os detalhes \n\n"
+        ) + mensagem_Compra.text
+        schema = Objetos.Compra_Bonificada
+        Resposta = Prompt_Gemini_Promocao(Resposta, schema)
+        if Resposta is not None:
+            Resposta.Print_Compra()
+            Salvar_Promocao_BD(Resposta)
+
+        # Coletando última mensagem de Adesão a Clube Bonificada
+        print('Coletando última mensagem de Adesão a Clube Bonificada')
+        Palavra_Procura = 'adesão'
+        mensagem_Adesao = await Procura_mensagem(Telegram_Client, Canal_Pronto_voar, limit, Palavra_Procura)
+        Prompt = (
+            "Instruções para extrair dados da mensagem a seguir:\n"
+            "Agencia: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.), caso houver vários usar palavra diversos\n"
+            "Milhas: Quantidade de milhas adquiridas na adesão\n"
+            "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
+            "link: Link para acessar a promoção\n"
+            "Sempre acessar o link da promoção para confirmar os detalhes \n\n"
+        ) + mensagem_Adesao.text
+        schema = Objetos.Adesao_Bonificada
+        Resposta = Prompt_Gemini_Promocao(Prompt, schema)
+        if Resposta is not None:
+            Resposta.Print_Adesao()
+            Salvar_Promocao_BD(Resposta)
+    except Exception as e:
+        print(f"[ERRO] Erro no Scraping: {e}")
+
+    # selecionando como vai rodar o programa, em Menu de opções para testar perguntas ao Gemini e BD ou Programa 24/7 padrão
     selecao = input(
-        "Escolha 'menu' de testes ou 'prog' para iniciar o programa 24/7 'Aguardando mensagens do Telegram':\n").strip().lower()
+        "Escolha 'menu' de testes ou 'prog' para iniciar o programa 24/7 'Aguardando mensagens do Telegram':\n").strip().casefold()
+
     if selecao == 'prog':
+        # Programa roda em loop infinito 24/7 para monitorar e extrair dados do Telegram
         print("[SISTEMA] Ciclo 24/7 iniciando...")
-        print("[SISTEMA] Aguardando mensagem do Telegram chegar...")
+        print("\n\n[SISTEMA] Aguardando mensagem do Telegram chegar...")
         # Aguardando mensagens do Telegram (Período de Teste para melhorar resposta do Gemini)
+        # Extraindo dados necessários dos canais utilizados
         Entidade_Canal_Cota = await Telegram_Client.get_entity(Canal_Cota)
         Entidade_Canal_Pronto_voar = await Telegram_Client.get_entity(Canal_Pronto_voar)
         Entidade_me = await Telegram_Client.get_entity('me')
-
+        # salvando id(s) para conexão nos canais
         id_cota = utils.get_peer_id(Entidade_Canal_Cota)
         id_pronto_voar = utils.get_peer_id(Entidade_Canal_Pronto_voar)
         id_me = utils.get_peer_id(Entidade_me)
 
+        # aguardando evento de nova mensagem em qualquer um dos canais listados
         @Telegram_Client.on(events.NewMessage(chats=[id_cota, id_pronto_voar, id_me]))
         async def handler(event):
             print("[SISTEMA] Mensagem recebida! traduzindo...")
@@ -334,7 +401,7 @@ async def executar_trabalho(Telegram_Client):
                 mensagem_Cota = event.message.text
 
                 # Perguntando ao Gemini sobre Cotação de milhas
-                Instruções_Cota = (
+                Prompt = (
                     "Instruções para extrair dados da mensagem a seguir:\n"
                     "1. Plataforma: Nome da plataforma de venda de milhas (Balcao de milhas, Hotmilhas, etc.)\n"
                     "2. Agencia: Nome da agencia de milhas (ex: Smiles, Latam Pass, TudoAzul, etc.)\n"
@@ -342,27 +409,27 @@ async def executar_trabalho(Telegram_Client):
                     "4. Valor máximo: Valor máximo da cotação\n"
                     "5. Data: Data da mensagem (ex: 01/01/2024)\n"
                     "6. Moeda: Moeda da cotação (ex: BRL, USD, EUR, etc.)\n\n"
-                )
+                ) + mensagem_Cota.text
 
-                Prompt = Instruções_Cota + mensagem_Cota.text
                 Resposta: list[Objetos.Cotacao] = Prompt_Gemini_Cotacao(
                     Prompt)
 
                 # Imprimindo a resposta do Gemini ou informando que não foi encontrada
                 if Resposta is not None:
-                    print("\nResposta do Gemini:")
+                    print("\nResposta do Gemini:\n")
                     print("-" * 40)
 
                     for cota in Resposta:
                         cota.Print_Cota()
+                        Salvar_Cotacao_BD(cota)
 
             # Canal Prontos para voar possui diversas promoções e propagandas diferentes
             elif event.chat_id == id_pronto_voar:
-                if 'Transferência bonificada' in event.message.text:
+                if 'transferência bonificada' in event.message.text.casefold():
                     print(
                         "[SISTEMA] Nova mensagem de Transferência Bonificada recebida.")
                     mensagem_Transf = event.message.text
-                    Instruções_Transf = (
+                    Prompt = (
                         "Instruções para extrair dados da mensagem a seguir:\n"
                         "Origem: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.)"
                         "caso haja vários add diversos + o tipo (banco, agencia etc.)\n"
@@ -371,33 +438,34 @@ async def executar_trabalho(Telegram_Client):
                         "Porcent_high: Porcentagem máxima da bonificação\n"
                         "Porcent_Low: Porcentagem mínima da bonificação\n"
                         "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
-                        "link: Link para acessar a promoção\n\n")
+                        "link: Link para acessar a promoção\n"
+                        "Sempre acessar o link da promoção para confirmar os detalhes \n\n") + mensagem_Transf.text
                     schema = Objetos.Transferencia_Bonificada
-                    Prompt = Instruções_Transf + mensagem_Transf.text
                     Resposta = Prompt_Gemini_Promocao(Prompt, schema)
 
                     # Imprimindo a resposta do Gemini ou informando que não foi encontrada
                     if Resposta is not None:
-                        print("\nResposta do Gemini:")
+                        print("\nResposta do Gemini:\n")
                         print("-" * 40)
                         Resposta.Print_Transf()
+                        Salvar_Promocao_BD(Resposta)
 
                 # Compra bonificada aparece com dois formatos diferentes, então é necessário verificar ambos
-                elif ('Comprar milhas' in event.message.text) or ('Comprar pontos' in event.message.text):
+                elif ('comprar milhas' in event.message.text.casefold()) or ('comprar pontos' in event.message.text.casefold()):
                     print(
                         "[SISTEMA] Nova mensagem de Compra Bonificada recebida.")
                     mensagem_Compra = event.message.text
                     # Perguntando ao Gemini sobre Compra Bonificada
-                    Instruções_Compra = (
+                    Prompt = (
                         "Instruções para extrair dados da mensagem a seguir:\n"
                         "Agencia: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.), caso houver vários usar palavra diversos\n"
                         "Porcent_high: Porcentagem máxima da bonificação\n"
                         "Porcent_Low: Porcentagem mínima da bonificação\n"
                         "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
-                        "link: Link para acessar a promoção\n\n"
-                    )
+                        "link: Link para acessar a promoção\n"
+                        "Sempre acessar o link da promoção para confirmar os detalhes \n\n"
+                    ) + mensagem_Compra.text
                     schema = Objetos.Compra_Bonificada
-                    Prompt = Instruções_Compra + mensagem_Compra.text
                     Resposta = Prompt_Gemini_Promocao(Prompt, schema)
 
                     # Imprimindo a resposta do Gemini ou informando que não foi encontrada
@@ -405,21 +473,22 @@ async def executar_trabalho(Telegram_Client):
                         print("\nResposta do Gemini:")
                         print("-" * 40)
                         Resposta.Print_Compra()
+                        Salvar_Promocao_BD(Resposta)
 
-                elif 'Adesão' in event.message.text:
+                elif 'adesão' in event.message.text.casefold():
                     print(
                         "[SISTEMA] Nova mensagem de Adesão a Clube Bonificada recebida.")
                     mensagem_Adesao = event.message.text
                     # Perguntando ao Gemini sobre Adesão a clubes bonificada
-                    Instruções_Adesao = (
+                    Prompt = (
                         "Instruções para extrair dados da mensagem a seguir:\n"
                         "Agencia: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.), caso houver vários usar palavra diversos\n"
                         "Milhas: Quantidade de milhas adquiridas na adesão\n"
                         "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
-                        "link: Link para acessar a promoção\n\n"
-                    )
+                        "link: Link para acessar a promoção\n"
+                        "Sempre acessar o link da promoção para confirmar os detalhes \n\n"
+                    ) + mensagem_Adesao.text
                     schema = Objetos.Adesao_Bonificada
-                    Prompt = Instruções_Adesao + mensagem_Adesao.text
                     Resposta = Prompt_Gemini_Promocao(Prompt, schema)
 
                     # Imprimindo a resposta do Gemini ou informando que não foi encontrada
@@ -427,22 +496,25 @@ async def executar_trabalho(Telegram_Client):
                         print("\nResposta do Gemini:")
                         print("-" * 40)
                         Resposta.Print_Adesao()
+                        Salvar_Promocao_BD(Resposta)
                 else:
                     print(
                         "[SISTEMA] Mensagem recebida, mas não corresponde a nenhuma categoria conhecida.")
 
             # Chat pessoal para testes dentro do fluxo 24/7
+            # CHAT PESSOAL EXCLUSIVO PARA TESTES
             elif event.chat_id == id_me:
                 print("[SISTEMA] Fonte: Chat Pessoal.\n" + "*"*40)
-                await Telegram_Client.send_message('me', "Mensagem Recebida! Identificando tipo de promoção/cotção")
-                if "Milhas" in event.message.text:
+                await Telegram_Client.send_message(id_me, f"Mensagem Recebida! Identificando tipo...")
+                # Identificando tipo Cotação de milhas
+                if ("balcão de milhas") in event.message.text.casefold():
                     print(
                         "[SISTEMA] Nova mensagem de Cotação de Milhas recebida.")
                     await Telegram_Client.send_message(id_me, "Identificado Modelo de cotação de milhas")
 
                     mensagem_Cota = event.message.text
                     # Perguntando ao Gemini sobre Cotação de milhas
-                    Instruções_Cota = (
+                    Prompt = (
                         "Instruções para extrair dados da mensagem a seguir:\n"
                         "1. Plataforma: Nome da plataforma de venda de milhas (Balcao de milhas, Hotmilhas, etc.)\n"
                         "2. Agencia: Nome da agencia de milhas (ex: Smiles, Latam Pass, TudoAzul, etc.)\n"
@@ -450,11 +522,11 @@ async def executar_trabalho(Telegram_Client):
                         "4. Valor máximo: Valor máximo da cotação\n"
                         "5. Data: Data da mensagem (ex: 01/01/2024)\n"
                         "6. Moeda: Moeda da cotação (ex: BRL, USD, EUR, etc.)\n\n"
-                    )
+                    ) + mensagem_Cota
 
-                    Prompt: str = Instruções_Cota + mensagem_Cota
                     print("[SISTEMA] Prompt gerado para o Gemini:\n" + Prompt)
 
+                    # Gerando a lista de cotações para realizar Update no banco de dados
                     Resposta: list[Objetos.Cotacao] = Prompt_Gemini_Cotacao(
                         Prompt)
                     print("[SISTEMA] Resposta do Gemini recebida:\n")
@@ -466,11 +538,96 @@ async def executar_trabalho(Telegram_Client):
                         await Telegram_Client.send_message(id_me, cota_menssagem_telegram)
                     for cota in Resposta:
                         Salvar_Cotacao_BD(cota)
+                # Identificando Mensagem de trnasferência bonificada
+                elif "transferência bonificada" in event.message.text.casefold():
+                    print(
+                        "[SISTEMA] Nova mensagem de Transferência Bonificada recebida.")
+                    await Telegram_Client.send_message(id_me, "Identificado Modelo de Transferência Bonificada")
+                    mensagem_Transf = event.message.text
+                    Prompt = (
+                        "Instruções para extrair dados da mensagem a seguir:\n"
+                        "Origem: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.)"
+                        "caso haja vários add diversos + o tipo (banco, agencia etc.)\n"
+                        "Destino: Nome da agencia de milhas de destino (ex: Smiles, Latam Pass, etc.)"
+                        "caso haja vários add diversos + o tipo (banco, agencia etc.)\n"
+                        "Porcent_high: Porcentagem máxima da bonificação\n"
+                        "Porcent_Low: Porcentagem mínima da bonificação\n"
+                        "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
+                        "link: Link para acessar a promoção\n"
+                        "Sempre acessar o link da promoção para confirmar os detalhes \n\n") + mensagem_Transf
+                    schema = Objetos.Transferencia_Bonificada
+                    Resposta = Prompt_Gemini_Promocao(Prompt, schema)
 
+                    # Imprimindo a resposta do Gemini ou informando que não foi encontrada
+                    if Resposta is not None:
+                        print("\nResposta do Gemini:\n")
+                        print("-" * 40)
+                        Resposta.Print_Transf()
+                        Resposta_String = Resposta.toString()
+                        await Telegram_Client.send_message(id_me, Resposta_String)
+                        Salvar_Promocao_BD(Resposta)
+                # Identificando Mensagem de Compra bonificada de milhas
+                elif "comprar milhas" in event.message.text.casefold() or "comprar pontos" in event.message.text.casefold() or \
+                        (("compra" in event.message.text.casefold()) and ("pontos" in event.message.text.casefold())):
+                    print(
+                        "[SISTEMA] Nova mensagem de Compra Bonificada recebida.")
+                    await Telegram_Client.send_message(id_me, "Identificado Modelo de Compra Bonificada")
+                    mensagem_Compra = event.message.text
+                    # Perguntando ao Gemini sobre Compra Bonificada
+                    Prompt = (
+                        "Instruções para extrair dados da mensagem a seguir:\n"
+                        "Agencia: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.), caso houver vários usar palavra diversos\n"
+                        "Porcent_high: Porcentagem máxima da bonificação\n"
+                        "Porcent_Low: Porcentagem mínima da bonificação\n"
+                        "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
+                        "link: Link para acessar a promoção\n"
+                        "Sempre acessar o link da promoção para confirmar os detalhes \n\n"
+                    ) + mensagem_Compra
+                    schema = Objetos.Compra_Bonificada
+                    Resposta = Prompt_Gemini_Promocao(Prompt, schema)
+
+                    # Imprimindo a resposta do Gemini ou informando que não foi encontrada
+                    if Resposta is not None:
+                        print("\nResposta do Gemini:")
+                        print("-" * 40)
+                        Resposta.Print_Compra()
+                        Resposta_String = Resposta.toString()
+                        await Telegram_Client.send_message(id_me, Resposta_String)
+                        Salvar_Promocao_BD(Resposta)
+                # Identificando mensagem como adesão bonificada
+                elif "adesão" in event.message.text.casefold():
+                    print(
+                        "[SISTEMA] Nova mensagem de Adesão a Clube Bonificada recebida.")
+                    await Telegram_Client.send_message(id_me, "Identificado Modelo de Adesão a Clube Bonificada")
+                    mensagem_Adesao = event.message.text
+                    # Perguntando ao Gemini sobre Adesão a clubes bonificada
+                    Prompt = (
+                        "Instruções para extrair dados da mensagem a seguir:\n"
+                        "Agencia: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.), caso houver vários usar palavra diversos\n"
+                        "Milhas: Quantidade de milhas adquiridas na adesão\n"
+                        "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
+                        "link: Link para acessar a promoção\n"
+                        "Sempre acessar o link da promoção para confirmar os detalhes \n\n"
+                    ) + mensagem_Adesao
+                    schema = Objetos.Adesao_Bonificada
+                    Resposta = Prompt_Gemini_Promocao(Prompt, schema)
+
+                    # Imprimindo a resposta do Gemini ou informando que não foi encontrada
+                    if Resposta is not None:
+                        print("\nResposta do Gemini:")
+                        print("-" * 40)
+                        Resposta.Print_Adesao()
+                        Resposta_String = Resposta.toString()
+                        await Telegram_Client.send_message(id_me, Resposta_String)
+                        Salvar_Promocao_BD(Resposta)
+                else:
+                    print(f"Mensagem não identificada:")
                 # 1. Define as duas funções primeiro
+
+        # Aviso de que o programa aguarda mensagem do Telegram chegar
         async def aviso_periodico():
             while True:
-                print('[SISTEMA] Aguardando mensagem do Telegram chegar...')
+                print('\n\n[SISTEMA] Aguardando mensagem do Telegram chegar...')
                 await asyncio.sleep(120)
 
         async def vigiar_parada():
@@ -490,7 +647,6 @@ async def executar_trabalho(Telegram_Client):
             tarefa_aviso.cancel()
             tarefa_vigia.cancel()
             print('[SISTEMA] Programa 24/7 encerrado...')
-
     elif selecao == 'menu':
         while True:
             # Menu de opções perguntar ao Gemini
@@ -586,32 +742,23 @@ async def executar_trabalho(Telegram_Client):
                         Resposta.Print_Adesao()
                 case '6':
                     # Salvando dados de Cotação de Milhas no banco de dados
-                    try:
-                        connection = mariadb.connect(
-                            host="100.79.171.116",
-                            port=3306,
-                            database="Banco_da_Millie",
-                            user="java_user",
-                            password="50BMG"
-                        )
-                        cursor = connection.cursor()
-
-                        # Query SQL com placeholders (?)
-                        sql = """
-                                    INSERT INTO cotacoes (Plataforma, valor)
-                                    VALUES (?, ?)
-                                """
-                        cursor.execute(sql, (
-                            Resposta.Plataforma,
-                            Resposta.Media
-                        ))
-                        connection.commit()
-                    except mariadb.Error as e:
+                    if mensagem_Cota is not None:
                         print(
-                            f"[ERRO] Erro ao salvar dados no banco de dados: {e}")
-                    finally:
-                        if 'connection' in locals():
-                            connection.close()
+                            "[SISTEMA] Salvando dados de Cotação de Milhas no banco de dados...")
+                        Salvar_Cotacao_BD(mensagem_Cota)
+                    if mensagem_Transf is not None:
+                        print(
+                            "[SISTEMA] Salvando dados de Transferência de Milhas no banco de dados...")
+                        Salvar_Promocao_BD(mensagem_Transf)
+                    if mensagem_Compra is not None:
+                        print(
+                            "[SISTEMA] Salvando dados de Compra de Milhas no banco de dados...")
+                        Salvar_Promocao_BD(mensagem_Compra)
+                    if mensagem_Adesao is not None:
+                        print(
+                            "[SISTEMA] Salvando dados de Adesão a Clubes Bonificadas no banco de dados...")
+                        Salvar_Promocao_BD(mensagem_Adesao)
+
                 case '0':
                     print("[SISTEMA] Encerrando o programa...")
                     break
@@ -619,6 +766,8 @@ async def executar_trabalho(Telegram_Client):
                     print("[AVISO] Opção inválida. Tente novamente.")
     else:
         print("[AVISO]Opção escolhida não é válida. retornando ao standby do programa.")
+
+# Função de execução das threads
 
 
 def loop_trabalho():
@@ -655,6 +804,8 @@ def loop_trabalho():
     loop.close()
     print("[SISTEMA] Programa encerrando definitivamente.\n" + "=" * 40)
 
+# Função de ativação da Thread
+
 
 def start():
     """Inicia a thread se ela não estiver ativa."""
@@ -676,6 +827,8 @@ def start():
         return
     iniciar_trabalho.set()  # Sinaliza para iniciar o trabalho
     print("[SISTEMA] Trabalho iniciado com sucesso.")
+
+# Função de pausar ou encerrar a Thread
 
 
 def stop():
@@ -702,9 +855,11 @@ def stop():
     print("[SISTEMA] Programa Encerrado com sucesso." + "\n" * 3)
 
 
+# Verificação do terminal constante para ativação, pausa ou encerramento da thread (tarefa)
 if __name__ == "__main__":
     while True:
-        comando = input("Digite 'start', 'stop' ou 'sair': ").strip().lower()
+        comando = input(
+            "Digite 'start', 'stop' ou 'sair': ").strip().casefold()
 
         if comando == "start":
             start()

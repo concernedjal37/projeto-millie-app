@@ -61,7 +61,7 @@ class Cotacao(BaseModel):
             f'Valor Mínimo Cotação: R$ {self.Valor_min:.2f}\n'
             f'Valor Máximo Cotação: R$ {self.Valor_max:.2f}\n'
             f'Montante Acumulado: {self.Monte}\n'
-            f"Vencimento: {self.Data.strftime('%d/%m/%Y %H:%M')}"
+            f"Vencimento: {self.Data.strftime('%d/%m/%Y %H:%M')}\n"
         )
 # Classe de transferencia bonificada de milhas
 
@@ -83,8 +83,18 @@ class Transferencia_Bonificada(BaseModel):
               self.Data_Vencimento.strftime("%d/%m/%Y %H:%M"))
         print('Informações da Promoção: ', self.link)
 
+    def toString(self):
+        return (
+            f'Origem: {self.Origem}\n'
+            f'Destino: {self.Destino}\n'
+            f'Valor Mínimo Bônus: {self.Porcent_Low:.2f} %\n'
+            f'Valor Máximo Bônus: {self.Porcent_High:.2f} %\n'
+            f"Vencimento: {self.Data_Vencimento.strftime('%d/%m/%Y %H:%M')}\n"
+            f"Link: {self.link}\n"
+        )
 
 # Classe de compra bonificada de milhas
+
 
 class Compra_Bonificada(BaseModel):
     Origem: str
@@ -101,8 +111,17 @@ class Compra_Bonificada(BaseModel):
               self.Data_Vencimento.strftime("%d/%m/%Y %H:%M"))
         print('Informações da Promoção: ', self.link)
 
+    def toString(self):
+        return (
+            f'Origem: {self.Origem}\n'
+            f'Valor Mínimo Bônus: {self.Porcent_Low:.2f} %\n'
+            f'Valor Máximo Bônus: {self.Porcent_High:.2f} %\n'
+            f"Vencimento: {self.Data_Vencimento.strftime('%d/%m/%Y %H:%M')}\n"
+            f"Link: {self.link}\n"
+        )
 
 # Classe de adesão bonificada à uma agencia ou plataforma
+
 
 class Adesao_Bonificada(BaseModel):
     Origem: str
@@ -116,3 +135,11 @@ class Adesao_Bonificada(BaseModel):
         print('Vencimento: ',
               self.Data_Vencimento.strftime("%d/%m/%Y %H:%M"))
         print('Informações da Promoção: ', self.link)
+
+    def toString(self):
+        return (
+            f'Origem: {self.Origem}\n'
+            f'Quantidade de Milhas: {self.Milhas}\n'
+            f"Vencimento: {self.Data_Vencimento.strftime('%d/%m/%Y %H:%M')}"
+            f"Link: {self.link}\n"
+        )
