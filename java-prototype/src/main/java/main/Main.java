@@ -2,18 +2,32 @@ package main;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.util.Scanner;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import main.dto.GeckoItineraries;
 import main.dto.GeckoOffers;
 import main.dto.Gecko_Request;
 import main.dto.Gecko_Response;
+import main.dto.Transferencia_Boni;
+import main.dto.Compra_Boni;
+import main.dto.Adesao_Boni;
 import main.service.GeckoAPI;
+import main.dto.Cotacao;
 
 public class Main {
+    private static final String HOST_TAILSCALE = "100.79.171.116"; 
+    private static final String PORTA = "3306";
+    private static final String BANCO = "Banco_da_Millie";
     private static final Object lock = new Object();
+    
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("Iniciando programa");
         // 1. THREAD de Trabalho (contínuo)
@@ -37,7 +51,7 @@ public class Main {
                 System.err.println("[ERRO] Aguardando novo comando...");
                 continue; // Volta para o início do loop e aguarda novo start
             }
-
+            
             // Lista os resultados encontrados
             listItineraries(responseDTO.getData().getItineraries());
 
@@ -146,7 +160,6 @@ public class Main {
         Dotenv dotenv = Dotenv.load();
         String myApiKey = dotenv.get("GECKO_API_KEY");
         // Chave Gecko API para teste inicial simples desconsiderar após extração da variável de ambiente funcionar
-        String apiKey = "pk_live_Ew6DYPeqLQmEfWAisS2DTFoMGXtgMKLK"; 
         // Enviando Request para Gecko API
         System.out.println("Iniciando scraping...");
         Gecko_Response response = geckoAPI.extrairDados(myApiKey, requestDto); // Função de scrapping de dados API
@@ -158,20 +171,21 @@ public class Main {
         System.out.println("Request ID: " + response.getRequestId());
         System.out.println("Execution Time: " + response.getexecutionId());
         System.out.println("Not Found: " + response.getNotFound());
+        System.out.println("Link: " + response.getData().getUrl());
 
         // Condicionamento para manipulação de dados
         if (Boolean.TRUE.equals(response.getNotFound())){ // Responsta não encontrou dados para os parâmetros de request
-            System.out.println("Nenhum resultado encontrado para a pesquisa.");
+            System.out.println("[AVISO]Nenhum resultado encontrado para a pesquisa.");
             return response;
 
         }else if(response.getData() != null) {// Resposta com dados encontrados
-            System.out.println("Dados extraídos com sucesso:");
+            System.out.println("[SISTEMA] Dados extraídos com sucesso:");
             System.out.println("Fonte de Pesquisa: " + response.getData().getSource());
-            System.out.println("Tipo de Pesquisa: " + response.getData().getSearchType());
+            System.out.println("Tipo de Pesquisa: " + response.getData().getSearchType() + "*=*".repeat(50));
             return response;
 
         }else{ // Resposta não apresentou dado algum (provável erro no scrapping)
-            System.out.println("A resposta veio sem dados.");
+            System.out.println("[ERRO] A resposta veio sem dados." + "*=*".repeat(50));
             return response;
         }
     }
@@ -183,8 +197,9 @@ public class Main {
             requestDto.setTarget("voegol.com.br");
             requestDto.setType("plp");
             requestDto.setFrom("CNF");
-            requestDto.setTo("GRU");
-            requestDto.setDepartureDate("2026-11-19");
+            requestDto.setTo("AJU");
+            requestDto.setDepartureDate("2026-12-23");
+            requestDto.setReturnDate("2026-12-30");
             requestDto.setNumAdults(1);
             requestDto.setNumChildren(0);
             requestDto.setNumInfants(0);
@@ -246,5 +261,79 @@ public class Main {
         }
         return null;
     }
+    public static void extrairPromo_BD(List<Transferencia_Boni> transferencias, List<Compra_Boni> compras, List<Adesao_Boni> adesoes){
+        Dotenv dotenv = Dotenv.load();
+        String USUARIO = dotenv.get("USER");
+        String SENHA = dotenv.get("PASSWORD");
 
+        // criando url de conexão ao Banco_da_Millie por meio do app Tailscale;
+        String url = "jdbc:mariadb://" + HOST_TAILSCALE + ":" + PORTA + "/" + BANCO;
+        // Extraindo dados da tabela de promoções de transferência bonificada do banco de dados
+        String sql ="""
+            SELECT * FROM VERIFICAR_TRANSFERENCIA_BONI;
+        """;
+
+        try (Connection conection = DriverManager.getConnection(url,USUARIO,SENHA);
+            PreparedStatement stmt = conection.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()){
+                while (rs.next()) {
+                    // Lê linha por linha até não haver mais linhas para ler
+                    int id = rs.getInt("id_promocoes");
+                    String origem = rs.getString("plataforma_de_origem");
+                    String destino = rs.getString("plataforma_de_destino");
+                    double percent_min = rs.getDouble("percentual_MIN");
+                    double percent_max = rs.getDouble("percentual_MAX");
+                    double valor_milheiro_agencia = rs.getDouble("valor_milheiro_agencia");
+                    String data_vencimento = rs.getString("data_limite");
+                    // cria o objeto dos dados extraidos para adicionar a lista
+                    Transferencia_Boni obj = new Transferencia_Boni(id,origem,destino,percent_min,percent_max,valor_milheiro_agencia,data_vencimento);
+                    transferencias.add(obj);
+                }
+        } catch (Exception e) {
+            System.out.println("Erro ao extrair dados de transferência bonificada!! \n[ERRO] " + e);
+            // TODO: handle exception
+        }
+        sql = """
+            SELECT * FROM VERIFICAR_COMPRA_BONI;
+        """;
+        try (Connection conection = DriverManager.getConnection(url,USUARIO,SENHA);
+            PreparedStatement stmt = conection.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()){
+                while (rs.next()) {
+                    // Lê linha por linha até não haver mais linhas para ler
+                    int id = rs.getInt("id_promocoes");
+                    String origem = rs.getString("plataforma_de_origem");
+                    double percent_min = rs.getDouble("percentual_MIN");
+                    double percent_max = rs.getDouble("percentual_MAX");
+                    double valor_milheiro_agencia = rs.getDouble("valor_milheiro_agencia");
+                    String data_vencimento = rs.getString("data_limite");
+                    // cria o objeto dos dados extraidos para adicionar a lista
+                    Compra_Boni obj = new Compra_Boni(id, origem, percent_min, percent_max, valor_milheiro_agencia,  data_vencimento);
+                    compras.add(obj);
+                }
+        } catch (Exception e) {
+            System.out.println("Erro ao extrair dados de transferência bonificada!! \n[ERRO] " + e);
+        }
+        sql = """
+            SELECT * FROM VERIFICAR_ADESAO_BONI;
+        """;
+        try (Connection conection = DriverManager.getConnection(url,USUARIO,SENHA);
+            PreparedStatement stmt = conection.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()){
+                while (rs.next()) {
+                    // Lê linha por linha até não haver mais linhas para ler
+                    int id = rs.getInt("id_promocoes");
+                    String origem = rs.getString("plataforma_de_origem");
+                    int qtd_milhas = rs.getInt("qtd_milhas");
+                    String data_vencimento = rs.getString("data_limite");
+                    // cria o objeto dos dados extraidos para adicionar a lista
+                    Adesao_Boni obj = new Adesao_Boni(id, origem, qtd_milhas,  data_vencimento);
+                    adesoes.add(obj);
+                }
+        } catch (Exception e) {
+            System.out.println("Erro ao extrair dados de transferência bonificada!! \n[ERRO] " + e);
+        }
+            
+        
+    }
 }
