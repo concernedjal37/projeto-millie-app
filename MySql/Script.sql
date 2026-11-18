@@ -54,7 +54,8 @@ create table Promocoes(
 id int unsigned primary key not null auto_increment,
 link varchar(500) not null,
 data_limite datetime not null,
-plataforma_de_origem varchar(20) not null
+plataforma_de_origem varchar(20) not null,
+valor_milheiro_origem float not null
 )ENGINE = InnoDB;
 #drop table Promocoes;
 
@@ -179,7 +180,7 @@ DELIMITER ;
 #Criar promoções
 DELIMITER //
 create procedure adicionar_promo(
-in link varchar(500), in plataforma_de_origem varchar(20), in data_limite datetime, in codigo_verificacao tinyint,
+in link varchar(500), in plataforma_de_origem varchar(20), in data_limite datetime, in valor_milheiro_origem float, in codigo_verificacao tinyint,
 in plat_destino varchar(20) default 'ND', in percent_max float default 0, in percent_min float default 0,
 in quant_milhas int default 0
 )
@@ -191,7 +192,7 @@ if codigo_verificacao not between 1 and 3 then
 	select descricao_acao from log_operacoes;
 else
 	#Insere a promoção
-	insert into Promocoes(link, data_limite, plataforma_de_origem) values(link, data_limite, plataforma_de_origem);
+	insert into Promocoes(link, data_limite, plataforma_de_origem, valor_milheiro_origem) values(link, data_limite, plataforma_de_origem, valor_milheiro_origem);
 	#Pega o id
 	set novo_id = (select id from Promocoes order by id desc limit 1);
 	#Switch case de chernobyl
@@ -221,6 +222,38 @@ DELIMITER ;
 
 #Functions
 #Não criado ainda
+
+#	Triggers
+#Apagar Transferencia
+DELIMITER //
+create trigger apagar_Transferencia after delete on Transferencia_bonificada for each row
+begin
+delete from Promocoes where id = old.id_promocoes;
+end //
+DELIMITER ;
+#drop trigger apagar_Transferencia;
+#Automatico
+
+#Apagar Compra
+DELIMITER //
+create trigger apagar_Compra after delete on Compra_bonificada for each row
+begin
+delete from Promocoes where id = old.id_promocoes;
+end //
+DELIMITER ;
+#drop trigger apagar_Compra;
+#Automatico
+
+#Apagar Adesão
+DELIMITER //
+create trigger apagar_Adesao after delete on Adesao_bonificada for each row
+begin
+delete from Promocoes where id = old.id_promocoes;
+end //
+DELIMITER ;
+#drop trigger apagar_Adesao;
+#Automatico
+
 #	Views
 #View para visualização melhor dos desenvolvedores(ou talvez poderia ser utilizado de outras formas também) em relação a todos os dados de um tipo.
 create or replace view Verificar_Transferencia_Boni as select * from Promocoes join Transferencia_bonificada on id = id_promocoes;
