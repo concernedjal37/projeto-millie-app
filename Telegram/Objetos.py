@@ -72,6 +72,7 @@ class Transferencia_Bonificada(BaseModel):
     Porcent_High: float
     Porcent_Low: float
     Data_Vencimento: datetime
+    Valor_milheiro_origem: float 
     link: str
 
     def Print_Transf(self):
@@ -81,6 +82,7 @@ class Transferencia_Bonificada(BaseModel):
         print('Porcentagem Baixa: ', self.Porcent_Low)
         print('Vencimento: ',
               self.Data_Vencimento.strftime("%d/%m/%Y %H:%M"))
+        print('Valor do milheiro da plataforma: ', self.Valor_milheiro_origem)
         print('Informações da Promoção: ', self.link)
 
     def toString(self):
@@ -90,6 +92,7 @@ class Transferencia_Bonificada(BaseModel):
             f'Valor Mínimo Bônus: {self.Porcent_Low:.2f} %\n'
             f'Valor Máximo Bônus: {self.Porcent_High:.2f} %\n'
             f"Vencimento: {self.Data_Vencimento.strftime('%d/%m/%Y %H:%M')}\n"
+            f'Valor do milheiro da plataforma: {self.Valor_milheiro_origem:.2f} %\n'
             f"Link: {self.link}\n"
         )
 
@@ -101,6 +104,7 @@ class Compra_Bonificada(BaseModel):
     Porcent_High: float
     Porcent_Low: float
     Data_Vencimento: datetime
+    Valor_milheiro_origem: float 
     link: str
 
     def Print_Compra(self):
@@ -109,6 +113,7 @@ class Compra_Bonificada(BaseModel):
         print('Porcentagem Baixa: ', self.Porcent_Low)
         print('Vencimento: ',
               self.Data_Vencimento.strftime("%d/%m/%Y %H:%M"))
+        print('Valor do milheiro da plataforma: ', self.Valor_milheiro_origem)
         print('Informações da Promoção: ', self.link)
 
     def toString(self):
@@ -117,6 +122,7 @@ class Compra_Bonificada(BaseModel):
             f'Valor Mínimo Bônus: {self.Porcent_Low:.2f} %\n'
             f'Valor Máximo Bônus: {self.Porcent_High:.2f} %\n'
             f"Vencimento: {self.Data_Vencimento.strftime('%d/%m/%Y %H:%M')}\n"
+            f'Valor do milheiro da plataforma: {self.Valor_milheiro_origem:.2f} %\n'
             f"Link: {self.link}\n"
         )
 
@@ -127,6 +133,7 @@ class Adesao_Bonificada(BaseModel):
     Origem: str
     Milhas: int
     Data_Vencimento: datetime
+    Valor_milheiro_origem: float 
     link: str
 
     def Print_Adesao(self):
@@ -134,6 +141,7 @@ class Adesao_Bonificada(BaseModel):
         print('Milhas Bonificadas: ', self.Milhas)
         print('Vencimento: ',
               self.Data_Vencimento.strftime("%d/%m/%Y %H:%M"))
+        print('Valor do milheiro da plataforma: ', self.Valor_milheiro_origem)
         print('Informações da Promoção: ', self.link)
 
     def toString(self):
@@ -141,5 +149,6 @@ class Adesao_Bonificada(BaseModel):
             f'Origem: {self.Origem}\n'
             f'Quantidade de Milhas: {self.Milhas}\n'
             f"Vencimento: {self.Data_Vencimento.strftime('%d/%m/%Y %H:%M')}"
+            f'Valor do milheiro da plataforma: {self.Valor_milheiro_origem:.2f} %\n'
             f"Link: {self.link}\n"
         )

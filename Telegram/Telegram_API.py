@@ -231,12 +231,13 @@ def Salvar_Promocao_BD(promocao: any):
             return
         # Query SQL com placeholders (?)
         sql = """   
-                call adicionar_promo(%s, %s, %s, %s, %s, %s, %s, %s);
+                call adicionar_promo(%s, %s, %s, %s, %s, %s, %s, %s, %s);
             """
         cursor.execute(sql, (
             promocao.link,
             promocao.Origem,
             promocao.Data_Vencimento,
+            promocao.Valor_milheiro_origem,
             cod_tipo,
             promocao.Destino if type(
                 promocao).__name__ == 'Transferencia_Bonificada' else None,
@@ -375,6 +376,7 @@ async def executar_trabalho(Telegram_Client):
     selecao = input(
         "Escolha 'menu' de testes ou 'prog' para iniciar o programa 24/7 'Aguardando mensagens do Telegram':\n").strip().casefold()
 
+    #------------------------------Parte importante, é aqui que começa o programa de verdade!!!
     if selecao == 'prog':
         # Programa roda em loop infinito 24/7 para monitorar e extrair dados do Telegram
         print("[SISTEMA] Ciclo 24/7 iniciando...")
@@ -409,7 +411,7 @@ async def executar_trabalho(Telegram_Client):
                     "4. Valor máximo: Valor máximo da cotação\n"
                     "5. Data: Data da mensagem (ex: 01/01/2024)\n"
                     "6. Moeda: Moeda da cotação (ex: BRL, USD, EUR, etc.)\n\n"
-                ) + mensagem_Cota.text
+                ) + mensagem_Cota
 
                 Resposta: list[Objetos.Cotacao] = Prompt_Gemini_Cotacao(
                     Prompt)
@@ -439,7 +441,8 @@ async def executar_trabalho(Telegram_Client):
                         "Porcent_Low: Porcentagem mínima da bonificação\n"
                         "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
                         "link: Link para acessar a promoção\n"
-                        "Sempre acessar o link da promoção para confirmar os detalhes \n\n") + mensagem_Transf.text
+                        "Sempre acessar o link da promoção para confirmar os detalhes\n"
+                        "valor_milheiro_agencia: pesquisar o valor do milheiro na agência de origem da promoção\n\n") + mensagem_Transf
                     schema = Objetos.Transferencia_Bonificada
                     Resposta = Prompt_Gemini_Promocao(Prompt, schema)
 
@@ -463,8 +466,9 @@ async def executar_trabalho(Telegram_Client):
                         "Porcent_Low: Porcentagem mínima da bonificação\n"
                         "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
                         "link: Link para acessar a promoção\n"
-                        "Sempre acessar o link da promoção para confirmar os detalhes \n\n"
-                    ) + mensagem_Compra.text
+                        "Sempre acessar o link da promoção para confirmar os detalhes \n"
+                        "valor_milheiro_agencia: pesquisar o valor do milheiro na agência de origem da promoção\n\n"
+                    ) + mensagem_Compra
                     schema = Objetos.Compra_Bonificada
                     Resposta = Prompt_Gemini_Promocao(Prompt, schema)
 
@@ -486,8 +490,9 @@ async def executar_trabalho(Telegram_Client):
                         "Milhas: Quantidade de milhas adquiridas na adesão\n"
                         "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
                         "link: Link para acessar a promoção\n"
-                        "Sempre acessar o link da promoção para confirmar os detalhes \n\n"
-                    ) + mensagem_Adesao.text
+                        "Sempre acessar o link da promoção para confirmar os detalhes\n"
+                        "valor_milheiro_agencia: pesquisar o valor do milheiro na agência de origem da promoção\n\n"
+                    ) + mensagem_Adesao
                     schema = Objetos.Adesao_Bonificada
                     Resposta = Prompt_Gemini_Promocao(Prompt, schema)
 

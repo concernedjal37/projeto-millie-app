@@ -1,0 +1,7 @@
+Este documento obviamente tem a intenção de explicar a existencia do arquivo diagnostico.
+
+Porque eu decidi criar-lo:
+Eu tinha percebido que estava muito ruim ter que depender de usar o terminal do mariadb para verificar todos os dados a todo momento então decidi criar um código para ficar mais pratico ver o que aconteceu no banco e checar os dados dentro dele.
+
+Como funciona:
+O código felizmente é bem simples então não deveria ser muito difícil de entender o que ele faz mas em resumo ele busca os dados das promoções e cotações com um comando sql decidido pelo switch case.
