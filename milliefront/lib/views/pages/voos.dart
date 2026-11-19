@@ -8,6 +8,13 @@ class Voos extends StatefulWidget {
 }
 
 class _VoosState extends State<StatefulWidget> {
+  String? menuItem = 'i';
+  String? vooIda = '';
+  String? vooVolta = '';
+  String? dataIda = '';
+  String? dataVolta = '';
+  String? nPassageiro = '';
+  TextEditingController controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -42,16 +49,26 @@ class _VoosState extends State<StatefulWidget> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            SizedBox(
-                              child: Text(
-                                "Ida",
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  color: Colors.white,
+                            DropdownButton(
+                              value: menuItem,
+                              items: [
+                                DropdownMenuItem(
+                                  value: 'i',
+                                  child: Text('Ida'),
                                 ),
-                              ),
+                                DropdownMenuItem(
+                                  value: 'iv',
+                                  child: Text('Ida e Volta'),
+                                ),
+                              ],
+                              onChanged: (String? value) {
+                                setState(() {
+                                  menuItem = value;
+                                });
+                              },
                             ),
                             TextField(
+                              controller: controller,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
                                 hintText: 'Local de partida:',
@@ -60,8 +77,14 @@ class _VoosState extends State<StatefulWidget> {
                                   fontSize: 18.0,
                                 ),
                               ),
+                              onEditingComplete: () {
+                                setState(() {
+                                  vooIda = controller.text;
+                                });
+                              },
                             ),
                             TextField(
+                              controller: controller,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
                                 hintText: 'Local do destino:',
@@ -70,35 +93,59 @@ class _VoosState extends State<StatefulWidget> {
                                   fontSize: 18.0,
                                 ),
                               ),
-                            ),
-                            SizedBox(
-                              child: Text(
-                                "Volta",
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  color: Colors.white,
-                                ),
-                              ),
+                              onEditingComplete: () {
+                                setState(() {
+                                  vooVolta = controller.text;
+                                });
+                              },
                             ),
                             TextField(
+                              controller: controller,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
-                                hintText: 'Local de partida:',
+                                hintText: 'Data da ida:',
                                 hintStyle: TextStyle(
                                   color: Color(0xd0ffffff),
                                   fontSize: 18.0,
                                 ),
                               ),
+                              onEditingComplete: () {
+                                setState(() {
+                                  dataIda = controller.text;
+                                });
+                              },
                             ),
                             TextField(
+                              controller: controller,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
-                                hintText: 'Local do destino:',
+                                hintText: 'Data da volta:',
                                 hintStyle: TextStyle(
                                   color: Color(0xd0ffffff),
                                   fontSize: 18.0,
                                 ),
                               ),
+                              onEditingComplete: () {
+                                setState(() {
+                                  dataVolta = controller.text;
+                                });
+                              },
+                            ),
+                            TextField(
+                              controller: controller,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Número de passageiros:',
+                                hintStyle: TextStyle(
+                                  color: Color(0xd0ffffff),
+                                  fontSize: 18.0,
+                                ),
+                              ),
+                              onEditingComplete: () {
+                                setState(() {
+                                  nPassageiro = controller.text;
+                                });
+                              },
                             ),
                             Container(
                               padding: EdgeInsets.all(5.0),
@@ -123,7 +170,10 @@ class _VoosState extends State<StatefulWidget> {
                       Flexible(
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.vertical(top: Radius.zero, bottom: Radius.circular(10.0)),
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.zero,
+                              bottom: Radius.circular(10.0),
+                            ),
                             color: Color(0xff303070),
                           ),
                           width: double.infinity,

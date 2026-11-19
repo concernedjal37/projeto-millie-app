@@ -7,11 +7,13 @@ class Login extends StatefulWidget {
   // ignore: library_private_types_in_public_api
   _LoginState createState() => _LoginState();
 }
+
 class _LoginState extends State<StatefulWidget> {
   var _nomeUsuario = "";
   var _senha = "";
+  TextEditingController controller = TextEditingController();
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: Container(
@@ -28,53 +30,61 @@ class _LoginState extends State<StatefulWidget> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(
-                  child: Image.asset('assets/images/Logo_preto.png',
+                  child: Image.asset(
+                    'assets/images/Logo_preto.png',
                     height: 200,
                     width: 450,
                   ),
                 ),
                 SizedBox(
-                  child: Text("Usuario",
-                    style: TextStyle(
-                      fontSize: 30,
-                      color: Colors.black,
-                    ),
+                  child: Text(
+                    "Usuario",
+                    style: TextStyle(fontSize: 30, color: Colors.black),
                   ),
                 ),
                 TextField(
+                  controller: controller,
                   decoration: InputDecoration(border: OutlineInputBorder()),
+                  onEditingComplete: () {
+                    setState(() {
+                      _nomeUsuario = controller.text;
+                    });
+                  },
                 ),
                 SizedBox(
-                  child: Text("Senha",
-                    style: TextStyle(
-                      fontSize: 30,
-                      color: Colors.black,
-                    ),
+                  child: Text(
+                    "Senha",
+                    style: TextStyle(fontSize: 30, color: Colors.black),
                   ),
                 ),
                 TextField(
+                  controller: controller,
                   decoration: InputDecoration(border: OutlineInputBorder()),
+                  onEditingComplete: () {
+                    setState(() {
+                      _senha = controller.text;
+                    });
+                  },
                 ),
-                ElevatedButton(onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => WidgetTree()));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 95, 95, 207),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => WidgetTree()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 95, 95, 207),
+                  ),
+                  child: Text("Entrar", style: TextStyle(color: Colors.white)),
                 ),
-                child: Text("Entrar",
-                style: TextStyle(
-                  color: Colors.white,
+                TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    "Esqueci Minha senha",
+                    style: TextStyle(fontSize: 10, color: Colors.blueAccent),
+                  ),
                 ),
-                )),
-                TextButton(onPressed: () {
-                  
-                },
-                child: Text("Esqueci Minha senha",
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.blueAccent,
-                ),
-                )),
               ],
             ),
           ),

@@ -9,6 +9,8 @@ class PromocaoECotacao extends StatefulWidget {
 
 class _PromocaoECotacaoState extends State<StatefulWidget> {
   String? menuItem = 'pro';
+  String? pesquisaProCot = '';
+  TextEditingController controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -67,6 +69,7 @@ class _PromocaoECotacaoState extends State<StatefulWidget> {
                               },
                             ),
                             TextField(
+                              controller: controller,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
                                 hintText: 'Pesquisar:',
@@ -75,6 +78,11 @@ class _PromocaoECotacaoState extends State<StatefulWidget> {
                                   fontSize: 18.0,
                                 ),
                               ),
+                              onEditingComplete: () {
+                                setState(() {
+                                  pesquisaProCot = controller.text;
+                                });
+                              },
                             ),
                           ],
                         ),
@@ -82,7 +90,10 @@ class _PromocaoECotacaoState extends State<StatefulWidget> {
                       Flexible(
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.vertical(top: Radius.zero, bottom: Radius.circular(10.0)),
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.zero,
+                              bottom: Radius.circular(10.0),
+                            ),
                             color: Color(0xff303070),
                           ),
                           width: double.infinity,
