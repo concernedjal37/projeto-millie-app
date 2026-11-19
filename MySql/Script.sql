@@ -220,6 +220,20 @@ DELIMITER ;
 #Eu darei um exemplo de uso melhor depois, ainda não sei com total certeza como funciona os argumentos opcionais e eles ainda precisam de uma configuração melhor talvez
 #call adicionar_promo('akljfbsjkdjk', 'Smiles', data e hora,3);
 
+#Verificar promoções
+DELIMITER //
+create procedure Verificar_promo(in data_atual datetime)
+begin
+	if (select count(*) from Promocoes where data_atual = data_limite) > 0 then
+		delete from Transferencia_bonificada where data_atual = data_limite;
+		delete from Compra_bonificada where data_atual = data_limite;
+		delete from Adesao_bonificada where data_atual = data_limite;
+	end if;
+end //
+DELIMITER ;
+#drop procedure Verificar_promo;
+#call procedure Verificar_promo(data e hora atual);
+
 #Functions
 #Não criado ainda
 
@@ -262,3 +276,5 @@ create or replace view Verificar_Compra_Boni as select * from Promocoes join Com
 #select * from Verificar_Compra_Boni;
 create or replace view Verificar_Adesao_Boni as select * from Promocoes join Adesao_bonificada on id = id_promocoes;
 #select * from Verificar_Adesao_Boni;
+
+#Views para usos especificos ou consultas especificas
