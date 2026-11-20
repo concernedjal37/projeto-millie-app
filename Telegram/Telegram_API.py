@@ -94,9 +94,8 @@ thread_tarefa = None
 
 T = TypeVar('T', bound=BaseModel)
 
+
 # Função para entrar nos canais do telegram
-
-
 async def Entrar_Canal(Telegram_Client, Canal):
     print('Entrando no Canal: ', Canal)
     try:
@@ -106,9 +105,8 @@ async def Entrar_Canal(Telegram_Client, Canal):
         print(f"falha ao entrar no Canal {Canal}")
         # print(f"Erro: {e}")
 
+
 # Função para pesquisar as mensagens dentro do canal do telegram
-
-
 async def Procura_mensagem(Telegram_Client, Canal, limit, Palavra):
     print('Procurando mensagem...')
     async for message in Telegram_Client.iter_messages(Canal, limit, search=Palavra):
@@ -116,9 +114,9 @@ async def Procura_mensagem(Telegram_Client, Canal, limit, Palavra):
         if message.text:
             return message
 
+
+
 # Função para requisitar ao Gemini estruturação da mensagem em JSON (Exclusivo para cotação)
-
-
 def Prompt_Gemini_Cotacao(Prompt: str):
     print('[SISTEMA] Iniciando Prompt_Gemini_Cotacao...')
     count = 1
@@ -397,6 +395,8 @@ async def executar_trabalho(Telegram_Client):
     selecao = input(
         "Escolha 'menu' de testes ou 'prog' para iniciar o programa 24/7 'Aguardando mensagens do Telegram':\n").strip().casefold()
 
+    
+
     #------------------------------Parte importante, é aqui que começa o programa de verdade!!!
     if selecao == 'prog':
         # Programa roda em loop infinito 24/7 para monitorar e extrair dados do Telegram
@@ -434,13 +434,13 @@ async def executar_trabalho(Telegram_Client):
                     "6. Moeda: Moeda da cotação (ex: BRL, USD, EUR, etc.)\n\n"
                 ) + mensagem_Cota
 
-                Resposta: list[Objetos.Cotacao] = Prompt_Gemini_Cotacao(
-                    Prompt)
+                Resposta: list[Objetos.Cotacao] = Prompt_Gemini_Cotacao(Prompt)
 
                 # Imprimindo a resposta do Gemini ou informando que não foi encontrada
-                if Resposta is not None:
+                if Resposta:
                     print("\nResposta do Gemini:\n")
-                    print("-" * 40)
+                    #print("-" * 40)
+                    print("Tamanho de objetos da lista: " + str(len(Resposta)))
 
                     for cota in Resposta:
                         cota.Print_Cota()
@@ -527,7 +527,7 @@ async def executar_trabalho(Telegram_Client):
                     print(
                         "[SISTEMA] Mensagem recebida, mas não corresponde a nenhuma categoria conhecida.")
             #chamar a função aqui
-                verificarPromocoes(datetime.now())
+                verificarPromocoes(datetime.now(),)
 
             # Chat pessoal para testes dentro do fluxo 24/7
             # CHAT PESSOAL EXCLUSIVO PARA TESTES
@@ -675,129 +675,11 @@ async def executar_trabalho(Telegram_Client):
             tarefa_aviso.cancel()
             tarefa_vigia.cancel()
             print('[SISTEMA] Programa 24/7 encerrado...')
-    elif selecao == 'menu':
-        while True:
-            # Menu de opções perguntar ao Gemini
-            print('Menu Teste Telegram API')
-            print('-'*40)
-            print('1 - Perguntar ao Gemini sobre Cotação de Milhas')
-            print('2 - Perguntar ao Gemini sobre Transferência Bonificada')
-            print('3 - Perguntar ao Gemini sobre Compra Bonificada')
-            print('4 - Perguntar ao Gemini sobre Adesão a Clube Bonificada')
-            print('6 - Salvando dados de Cotação de Milhas')
-            print('0 - Sair')
-            Opcao = input('Escolha uma opção: ')
-            # Executando a opção escolhida
-            match Opcao:
-                case '1':
-                    # Perguntando ao Gemini sobre Cotação de milhas
-                    Instruções_Cota = (
-                        "Instruções para extrair dados da mensagem a seguir:\n"
-                        "1. Plataforma: Nome da plataforma de venda de milhas (Balcao de milhas, Hotmilhas, etc.)\n"
-                        "2. Agencia: Nome da agencia de milhas (ex: Smiles, Latam Pass, TudoAzul, etc.)\n"
-                        "3. Valor mínimo: Valor mínimo da cotação\n"
-                        "4. Valor máximo: Valor máximo da cotação\n"
-                        "5. Data: Data da mensagem (ex: 01/01/2024)\n"
-                        "6. Moeda: Moeda da cotação (ex: BRL, USD, EUR, etc.)\n\n"
-                    )
-
-                    Prompt = Instruções_Cota + mensagem_Cota.text
-                    Resposta: list[Objetos.Cotacao] = Prompt_Gemini_Cotacao(
-                        Prompt)
-
-                    # Imprimindo a resposta do Gemini ou informando que não foi encontrada
-                    if Resposta is not None:
-                        print("\nResposta do Gemini:")
-                        print("-" * 40)
-
-                        for cota in Resposta:
-                            cota.Print_Cota()
-                case '2':
-                    # Perguntando ao Gemini sobre Transferência Bonificada
-                    Instruções_Transf = (
-                        "Instruções para extrair dados da mensagem a seguir:\n"
-                        "Origem: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.), caso houver vários usar palavra diversos\n"
-                        "Destino: Nome da agencia de milhas de destino (ex: Smiles, Latam Pass, etc.)caso houver vários usar palavra diversos\n"
-                        "Porcent_high: Porcentagem máxima da bonificação\n"
-                        "Porcent_Low: Porcentagem mínima da bonificação\n"
-                        "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
-                        "link: Link para acessar a promoção\n\n")
-
-                    schema = Objetos.Transferencia_Bonificada
-                    Prompt = Instruções_Transf + mensagem_Transf.text
-                    Resposta = Prompt_Gemini_Promocao(Prompt, schema)
-                    # Imprimindo a resposta do Gemini ou informando que não foi encontrada
-                    if Resposta is not None:
-                        print("\nResposta do Gemini:")
-                        print("-" * 40)
-                        Resposta.Print_Transf()
-                case '3':
-                    # Perguntando ao Gemini sobre Compra Bonificada
-                    Instruções_Compra = (
-                        "Instruções para extrair dados da mensagem a seguir:\n"
-                        "Agencia: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.), caso houver vários usar palavra diversos\n"
-                        "Porcent_high: Porcentagem máxima da bonificação\n"
-                        "Porcent_Low: Porcentagem mínima da bonificação\n"
-                        "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
-                        "link: Link para acessar a promoção\n\n"
-                    )
-                    Prompt = Instruções_Compra + mensagem_Compra.text
-                    schema = Objetos.Compra_Bonificada
-                    Resposta = Prompt_Gemini_Promocao(Prompt, schema)
-
-                    # Imprimindo a resposta do Gemini ou informando que não foi encontrada
-                    if Resposta is not None:
-                        print("\nResposta do Gemini:")
-                        print("-" * 40)
-                        Resposta.Print_Compra()
-                case '4':
-                    # Perguntando ao Gemini sobre Adesão a clubes bonificada
-                    Instruções_Adesao = (
-                        "Instruções para extrair dados da mensagem a seguir:\n"
-                        "Agencia: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.), caso houver vários usar palavra diversos\n"
-                        "Milhas: Quantidade de milhas adquiridas na adesão\n"
-                        "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
-                        "link: Link para acessar a promoção\n\n"
-                    )
-                    Prompt = Instruções_Adesao + mensagem_Adesao.text
-                    schema = Objetos.Adesao_Bonificada
-                    Resposta = Prompt_Gemini_Promocao(Prompt, schema)
-
-                    # Imprimindo a resposta do Gemini ou informando que não foi encontrada
-                    if Resposta is not None:
-                        print("\nResposta do Gemini:")
-                        print("-" * 40)
-                        Resposta.Print_Adesao()
-                case '6':
-                    # Salvando dados de Cotação de Milhas no banco de dados
-                    if mensagem_Cota is not None:
-                        print(
-                            "[SISTEMA] Salvando dados de Cotação de Milhas no banco de dados...")
-                        Salvar_Cotacao_BD(mensagem_Cota)
-                    if mensagem_Transf is not None:
-                        print(
-                            "[SISTEMA] Salvando dados de Transferência de Milhas no banco de dados...")
-                        Salvar_Promocao_BD(mensagem_Transf)
-                    if mensagem_Compra is not None:
-                        print(
-                            "[SISTEMA] Salvando dados de Compra de Milhas no banco de dados...")
-                        Salvar_Promocao_BD(mensagem_Compra)
-                    if mensagem_Adesao is not None:
-                        print(
-                            "[SISTEMA] Salvando dados de Adesão a Clubes Bonificadas no banco de dados...")
-                        Salvar_Promocao_BD(mensagem_Adesao)
-
-                case '0':
-                    print("[SISTEMA] Encerrando o programa...")
-                    break
-                case _:
-                    print("[AVISO] Opção inválida. Tente novamente.")
     else:
         print("[AVISO]Opção escolhida não é válida. retornando ao standby do programa.")
 
+
 # Função de execução das threads
-
-
 def loop_trabalho():
     print("[SISTEMA] Iniciando a thread de trabalho...")
 
@@ -832,9 +714,8 @@ def loop_trabalho():
     loop.close()
     print("[SISTEMA] Programa encerrando definitivamente.\n" + "=" * 40)
 
+
 # Função de ativação da Thread
-
-
 def start():
     """Inicia a thread se ela não estiver ativa."""
     global thread_tarefa
@@ -856,9 +737,8 @@ def start():
     iniciar_trabalho.set()  # Sinaliza para iniciar o trabalho
     print("[SISTEMA] Trabalho iniciado com sucesso.")
 
+
 # Função de pausar ou encerrar a Thread
-
-
 def stop():
     global thread_tarefa
 
@@ -898,3 +778,128 @@ if __name__ == "__main__":
             break
         else:
             print("Comando inválido. Digite 'start', 'stop' ou 'sair'.")
+
+
+
+
+
+    #-------Parte não utilizada
+        """elif selecao == 'menu':
+            while True:
+                # Menu de opções perguntar ao Gemini
+                print('Menu Teste Telegram API')
+                print('-'*40)
+                print('1 - Perguntar ao Gemini sobre Cotação de Milhas')
+                print('2 - Perguntar ao Gemini sobre Transferência Bonificada')
+                print('3 - Perguntar ao Gemini sobre Compra Bonificada')
+                print('4 - Perguntar ao Gemini sobre Adesão a Clube Bonificada')
+                print('6 - Salvando dados de Cotação de Milhas')
+                print('0 - Sair')
+                Opcao = input('Escolha uma opção: ')
+                # Executando a opção escolhida
+                match Opcao:
+                    case '1':
+                        # Perguntando ao Gemini sobre Cotação de milhas
+                        Instruções_Cota = (
+                            "Instruções para extrair dados da mensagem a seguir:\n"
+                            "1. Plataforma: Nome da plataforma de venda de milhas (Balcao de milhas, Hotmilhas, etc.)\n"
+                            "2. Agencia: Nome da agencia de milhas (ex: Smiles, Latam Pass, TudoAzul, etc.)\n"
+                            "3. Valor mínimo: Valor mínimo da cotação\n"
+                            "4. Valor máximo: Valor máximo da cotação\n"
+                            "5. Data: Data da mensagem (ex: 01/01/2024)\n"
+                            "6. Moeda: Moeda da cotação (ex: BRL, USD, EUR, etc.)\n\n"
+                        )
+
+                        Prompt = Instruções_Cota + mensagem_Cota.text
+                        Resposta: list[Objetos.Cotacao] = Prompt_Gemini_Cotacao(
+                            Prompt)
+
+                        # Imprimindo a resposta do Gemini ou informando que não foi encontrada
+                        if Resposta is not None:
+                            print("\nResposta do Gemini:")
+                            print("-" * 40)
+
+                            for cota in Resposta:
+                                cota.Print_Cota()
+                    case '2':
+                        # Perguntando ao Gemini sobre Transferência Bonificada
+                        Instruções_Transf = (
+                            "Instruções para extrair dados da mensagem a seguir:\n"
+                            "Origem: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.), caso houver vários usar palavra diversos\n"
+                            "Destino: Nome da agencia de milhas de destino (ex: Smiles, Latam Pass, etc.)caso houver vários usar palavra diversos\n"
+                            "Porcent_high: Porcentagem máxima da bonificação\n"
+                            "Porcent_Low: Porcentagem mínima da bonificação\n"
+                            "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
+                            "link: Link para acessar a promoção\n\n")
+
+                        schema = Objetos.Transferencia_Bonificada
+                        Prompt = Instruções_Transf + mensagem_Transf.text
+                        Resposta = Prompt_Gemini_Promocao(Prompt, schema)
+                        # Imprimindo a resposta do Gemini ou informando que não foi encontrada
+                        if Resposta is not None:
+                            print("\nResposta do Gemini:")
+                            print("-" * 40)
+                            Resposta.Print_Transf()
+                    case '3':
+                        # Perguntando ao Gemini sobre Compra Bonificada
+                        Instruções_Compra = (
+                            "Instruções para extrair dados da mensagem a seguir:\n"
+                            "Agencia: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.), caso houver vários usar palavra diversos\n"
+                            "Porcent_high: Porcentagem máxima da bonificação\n"
+                            "Porcent_Low: Porcentagem mínima da bonificação\n"
+                            "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
+                            "link: Link para acessar a promoção\n\n"
+                        )
+                        Prompt = Instruções_Compra + mensagem_Compra.text
+                        schema = Objetos.Compra_Bonificada
+                        Resposta = Prompt_Gemini_Promocao(Prompt, schema)
+
+                        # Imprimindo a resposta do Gemini ou informando que não foi encontrada
+                        if Resposta is not None:
+                            print("\nResposta do Gemini:")
+                            print("-" * 40)
+                            Resposta.Print_Compra()
+                    case '4':
+                        # Perguntando ao Gemini sobre Adesão a clubes bonificada
+                        Instruções_Adesao = (
+                            "Instruções para extrair dados da mensagem a seguir:\n"
+                            "Agencia: Nome da agencia de milhas de origem (ex: Smiles, Latam Pass, etc.), caso houver vários usar palavra diversos\n"
+                            "Milhas: Quantidade de milhas adquiridas na adesão\n"
+                            "Data_Vencimento: Data de vencimento da promoção (ex: 01/01/2024)\n"
+                            "link: Link para acessar a promoção\n\n"
+                        )
+                        Prompt = Instruções_Adesao + mensagem_Adesao.text
+                        schema = Objetos.Adesao_Bonificada
+                        Resposta = Prompt_Gemini_Promocao(Prompt, schema)
+
+                        # Imprimindo a resposta do Gemini ou informando que não foi encontrada
+                        if Resposta is not None:
+                            print("\nResposta do Gemini:")
+                            print("-" * 40)
+                            Resposta.Print_Adesao()
+                    case '6':
+                        # Salvando dados de Cotação de Milhas no banco de dados
+                        if mensagem_Cota is not None:
+                            print(
+                                "[SISTEMA] Salvando dados de Cotação de Milhas no banco de dados...")
+                            Salvar_Cotacao_BD(mensagem_Cota)
+                        if mensagem_Transf is not None:
+                            print(
+                                "[SISTEMA] Salvando dados de Transferência de Milhas no banco de dados...")
+                            Salvar_Promocao_BD(mensagem_Transf)
+                        if mensagem_Compra is not None:
+                            print(
+                                "[SISTEMA] Salvando dados de Compra de Milhas no banco de dados...")
+                            Salvar_Promocao_BD(mensagem_Compra)
+                        if mensagem_Adesao is not None:
+                            print(
+                                "[SISTEMA] Salvando dados de Adesão a Clubes Bonificadas no banco de dados...")
+                            Salvar_Promocao_BD(mensagem_Adesao)
+
+                    case '0':
+                        print("[SISTEMA] Encerrando o programa...")
+                        break
+                    case _:
+                        print("[AVISO] Opção inválida. Tente novamente.")
+                        """
+        #Acabou a parte que não dá para se utilizar
