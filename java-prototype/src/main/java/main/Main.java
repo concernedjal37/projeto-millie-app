@@ -4,13 +4,14 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+
 import io.github.cdimascio.dotenv.Dotenv;
+
 import java.util.Scanner;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 import main.dto.GeckoItineraries;
 import main.dto.GeckoOffers;
@@ -32,6 +33,7 @@ public class Main {
         System.out.println("Iniciando programa");
         // 1. THREAD de Trabalho (contínuo)
         Thread workerThread = new Thread(() -> {
+            // Iteração contínua para aguardar start (standby) e execução do trabalho
             while(true){
                 // Script de aguarde de gatilho -> "Start"
                 synchronized (lock) {
@@ -45,84 +47,184 @@ public class Main {
                 }
                 // Script contínuo do código a ser executado
                 //Extração de dados do GeckoAPI "passagens aéreas"
-            Gecko_Response responseDTO = scrapingData();
+                Gecko_Response responseDTO = scrapingData();
 
-            if (responseDTO == null || responseDTO.getData() == null || responseDTO.getData().getItineraries() == null) {
-                System.err.println("[ERRO] Aguardando novo comando...");
-                continue; // Volta para o início do loop e aguarda novo start
-            }
-            
-            // Lista os resultados encontrados
-            listItineraries(responseDTO.getData().getItineraries());
+                if (responseDTO == null || responseDTO.getData() == null || responseDTO.getData().getItineraries() == null) {
+                    System.err.println("[ERRO] Aguardando novo comando...");
+                    continue; // Volta para o início do loop e aguarda novo start
+                }
+                
+                // Lista os resultados encontrados
+                listItineraries(responseDTO.getData().getItineraries());
+                // Identifica o itinerário de menor preço em dinheiro
+                GeckoItineraries itinerary_menor_preco = encontraMenor(responseDTO.getData().getItineraries());
+                // extraindo valor do itinerario mais barato
+                double precoDinheiro = itinerary_menor_preco.getCheapestOffer().getTotal().getAmount();
+                String moeda = itinerary_menor_preco.getCheapestOffer().getTotal().getCurrency();
 
-            // Identifica o itinerário de menor preço em dinheiro
-            GeckoItineraries menorPreco = encontraMenor(responseDTO.getData().getItineraries());
+                System.out.println("=".repeat(40) + "\nViagem mais econômica (Dinheiro)");
+                System.out.println("Origem: " + itinerary_menor_preco.getOrigin());
+                System.out.println("Destino: " + itinerary_menor_preco.getDestination());
+                System.out.println("Duração: " + formatDuration(itinerary_menor_preco.getDuration()));
+                System.out.println("Número de paradas: " + itinerary_menor_preco.getStopCount());
+                System.out.println("Valor: " + moeda + " " + String.format("%.2f", precoDinheiro));
 
-            double precoDinheiro = menorPreco.getCheapestOffer().getTotal().getAmount();
-            String moeda = menorPreco.getCheapestOffer().getTotal().getCurrency();
+                // ====================================================================
+                // CÁLCULO E COMPARAÇÃO DE MODALIDADES DE PAGAMENTO
+                // ====================================================================
+                // Estabelecendo valor da passagem mais barata
+                double preco_passagem_barata = itinerary_menor_preco.getCheapestOffer().getTotal().getAmount();
+                // Instanciando as listas de promoções no banco de dados
+                List<Transferencia_Boni> lista_transferencias = new ArrayList<>();
+                List<Compra_Boni> lista_compras = new ArrayList<>();
+                List<Adesao_Boni> lista_adesao = new ArrayList<>();
+                // função de busca das promoções no banco de dados
+                extrairPromo_BD(lista_transferencias, lista_compras, lista_adesao);
 
-            System.out.println("=".repeat(40) + "\nViagem mais econômica (Dinheiro)");
-            System.out.println("Origem: " + menorPreco.getOrigin());
-            System.out.println("Destino: " + menorPreco.getDestination());
-            System.out.println("Duração: " + formatDuration(menorPreco.getDuration()));
-            System.out.println("Valor: " + moeda + " " + String.format("%.2f", precoDinheiro));
+                // função de extrair tabela com os valores de cotação de cada agencia de milhas
+                List<Cotacao> lista_cotacoes = extrairCota_BD();
 
-            // ====================================================================
-            // CÁLCULO E COMPARAÇÃO DE MODALIDADES DE PAGAMENTO
-            // ====================================================================
-            
-            // Dados da passagem em milhas (simulação/banco)
-            double precoMilhas = 24000.0;
-            double milheirosNecessarios = precoMilhas / 1000.0;
+                System.out.println("[SISTEMA] Imprimindo todas as listas extraidas do banco de dados");
+                // Impressão das listas extraidas
+                // Imprimindo Lista de Transferencia Bonificada
+                if(!lista_transferencias.isEmpty()){
+                    System.out.println("Tabela Transferencia Bonificada");
+                    System.out.println("  id  |  Origem  |  Destino  |  Valor Mínimo  |  Valor Máximo  |");
+                    for(Transferencia_Boni transferencia: lista_transferencias){
+                        transferencia.printTransf();
+                    }
+                }else{System.out.println("Lista de transferencia bonificada vazia");}
 
-            // Simulação de parâmetros vindos do banco de dados/promoções
-            double cotaValorMilheiro = 23.50; // Cotação mercado secundário
-            
-            double precoCompraBase = 70.00;   // Preço padrão do milheiro
-            double bonusCompraPercent = 100.0; // 100% de bônus na compra
-            
-            double cpmOrigemBanco = 35.00;    // Custo base no banco/cartão
-            double bonusTransfPercent = 80.0;  // 80% de bônus na transferência
+                // Imprimindo Lista de Compra Bonificada
+                if(!lista_compras.isEmpty()){
+                    System.out.println("Tabela Compra Bonificada");
+                    System.out.println("  id  |  Origem   |  Valor Mínimo  |  Valor Máximo  |");
+                    for(Compra_Boni compra: lista_compras){
+                        compra.printCompra();
+                    }
+                }else{System.out.println("Lista de compra bonificada vazia");}
 
-            // 1. Cálculo do custo total em cada modalidade (R$)
-            double custoDinheiro = precoDinheiro;
+                // Imprimindo Lista de Adesão Bonificada
+                if(!lista_adesao.isEmpty()){
+                    System.out.println("Tabela Adesao Bonificada");
+                    System.out.println("  id  |  Origem  |  Destino  |  Valor Mínimo  |  Valor Máximo  |");
+                    for(Adesao_Boni Adesao: lista_adesao){
+                        Adesao.printAdesao();
+                    }
+                }else{System.out.println("Lista de adesao bonificada vazia");}
 
-            double cpmCotacao = cotaValorMilheiro;
-            double custoCotacao = milheirosNecessarios * cpmCotacao;
+                // Imprimindo Lista de Cotações
+                if(!lista_cotacoes.isEmpty()){
+                    System.out.println("Tabela Cotacoes");
+                    System.out.println("  id  |  Origem  |  Destino  |  Valor Mínimo  |  Valor Máximo  |");
+                    for(Cotacao cota: lista_cotacoes){
+                        cota.printCota();
+                    }
+                }else{System.out.println("Lista de cotacoes vazia");}
 
-            double cpmCompraBonus = precoCompraBase / (1 + (bonusCompraPercent / 100.0));
-            double custoCompraBonus = milheirosNecessarios * cpmCompraBonus;
 
-            double cpmTransfBonus = cpmOrigemBanco / (1 + (bonusTransfPercent / 100.0));
-            double custoTransfBonus = milheirosNecessarios * cpmTransfBonus;
+                System.out.println("[SISTEMA] Promoções e cotações extraidas com sucesso");
 
-            // 2. Determinação da modalidade mais barata
-            double menorCusto = custoDinheiro;
-            String melhorOpcao = "Pagamento em Dinheiro no site";
+                //=============================================================================================================
+                // Dados da passagem em milhas (simulação) *tal valor vem direto da pesquisa da gecko no site da smiles ou azul 
+                double preco_passagem_milhas = 40000.0;
+                //=============================================================================================================
+                //Calculando valores chave
+                // 1º Valor por milheiro na agencia de origem (transferencia bonificada)
+                double valor_milheiro_transf = 0.0;
+                if(!lista_transferencias.isEmpty()){
+                    int conta_promo = 0;
+                    Transferencia_Boni maior_transf = lista_transferencias.get(0);
+                    for(Transferencia_Boni transferencia:lista_transferencias){
+                        if(transferencia.getDestino().equalsIgnoreCase("AZUL")){
+                            maior_transf = transferencia;
+                            conta_promo++;
+                        }
+                    } // selecionando somente valor da Azul para iniciar verificação
+                    if(conta_promo>0){
+                        for(Transferencia_Boni transferencia : lista_transferencias){
+                            if(transferencia.getDestino().equalsIgnoreCase("AZUL")&&
+                                (transferencia.getPercentMax()>maior_transf.getPercentMax())){
+                                    maior_transf = transferencia;
+                            }
+                        }
+                        // Cálculo do valor do milheiro por meio da promoção
+                        valor_milheiro_transf = maior_transf.getValorMilhasOrigem()/(1+(maior_transf.getPercentMax()/100.0));
 
-            if (custoCotacao < menorCusto) {
-                menorCusto = custoCotacao;
-                melhorOpcao = "Compra de Milhas via Cotação";
-            }
-            if (custoCompraBonus < menorCusto) {
-                menorCusto = custoCompraBonus;
-                melhorOpcao = "Compra Bonificada (" + (int) bonusCompraPercent + "% bônus)";
-            }
-            if (custoTransfBonus < menorCusto) {
-                menorCusto = custoTransfBonus;
-                melhorOpcao = "Transferência Bonificada (" + (int) bonusTransfPercent + "% bônus)";
-            }
+                        maior_transf.printTransf();
+                        // Aprimorar para enviar dados ao flutter (identificando melhor opção)
+                        boolean opcao_transf = avaliarOpcao(
+                            "Transferência de pontos",
+                            preco_passagem_barata,
+                            preco_passagem_milhas,
+                            valor_milheiro_transf
+                        );
 
-            // 3. Exibição do Comparativo
-            System.out.println("\n" + "=".repeat(40));
-            System.out.println("RESUMO COMPARATIVO DE PREÇOS:");
-            System.out.printf("- Dinheiro direto: R$ %.2f%n", custoDinheiro);
-            System.out.printf("- Cotação (CPM R$ %.2f): R$ %.2f%n", cpmCotacao, custoCotacao);
-            System.out.printf("- Compra Bonificada (CPM R$ %.2f): R$ %.2f%n", cpmCompraBonus, custoCompraBonus);
-            System.out.printf("- Transferência Bonificada (CPM R$ %.2f): R$ %.2f%n", cpmTransfBonus, custoTransfBonus);
-            System.out.println("-".repeat(40));
-            System.out.printf(">>> MELHOR OPÇÃO: %s por R$ %.2f%n", melhorOpcao, menorCusto);
-            System.out.println("=".repeat(40));
+                    }else{System.out.println("Não existe transferencias bonificadas para AZUL");}   
+                }else{System.out.println("Não existe promoções de transferencia bonificada");}
+                
+                // 2º passo Valor por milheiro da compra bonificada
+                double valor_milheiro_compra = 0.0;
+                if(!lista_compras.isEmpty()){
+                    int conta_promo = 0;
+                    Compra_Boni maior_compra = lista_compras.get(0);
+                    for(Compra_Boni compra: lista_compras){
+                        if(compra.getOrigem().equalsIgnoreCase("AZUL"))
+                            maior_compra = compra;
+                            conta_promo++;
+                    }// selecionar compras da azul
+                    if(conta_promo >0){
+                        for(Compra_Boni compra : lista_compras){
+                            if(compra.getOrigem().equalsIgnoreCase("AZUL") && 
+                                (compra.getPercentMax()>maior_compra.getPercentMax())){
+                                    maior_compra = compra;      
+                            }
+                        }
+                        // Cálculo do valor do milheiro por meio da promoção
+                        valor_milheiro_compra = maior_compra.getValorMilhasOrigem()/(1+(maior_compra.getPercentMax()/100.0));
+
+                        // Comparativo: Compra Bonificada
+                        // Aprimorar para enviar dados ao flutter (identificando melhor opção)
+                        maior_compra.printCompra();
+                        boolean opcao_compra =avaliarOpcao(
+                            "Compra bonificada de pontos",
+                            preco_passagem_barata,
+                            preco_passagem_milhas,
+                            valor_milheiro_compra
+                        );
+                    }else{System.out.println("Não existe compra bonificada para AZUL");}
+                }else{System.out.println("Não existe promoções de compra bonificada");}
+                
+                // Avaliando cotação
+                Cotacao cota_azul = new Cotacao();
+                if(!lista_cotacoes.isEmpty()){
+                    int conta_cota = 0;
+                    for(Cotacao cota: lista_cotacoes){
+                        if(cota.getAgencia().equalsIgnoreCase("AZUL")){
+                            cota_azul = cota;
+                            conta_cota++;
+                        }
+                    }// selecionando dentro da lista apenas as cotações da azul
+                    // Extração de cotação de milhas da companhia operadora da viagem
+                    if(conta_cota>0){
+                        for (Cotacao cota: lista_cotacoes) {
+                            if(cota.getAgencia().equalsIgnoreCase("AZUL") && cota.getValorMin()<cota_azul.getValorMin()){
+                                cota_azul = cota;
+                            }
+                        }
+                        // Comparando com contacoes
+                        // Aprimorar para enviar dados ao flutter (identificando melhor opção)
+                        cota_azul.printCota();
+                        boolean opcao_cota = avaliarOpcao(
+                            "Compra via cotação",
+                            preco_passagem_barata,
+                            preco_passagem_milhas,
+                            cota_azul.getValorMax()
+                        );
+                    }else{System.out.println("Não existe cotação para AZUL");}
+                }else{System.out.println("Não existe lista de cotações no banco de dados.");}
+                
+                
         }
     });
     workerThread.start();
@@ -220,10 +322,13 @@ public class Main {
                     switch (offer.getBrandId()) {
                         case "LI":
                             System.out.println("Light");
+                            break;
                         case "CL":
                             System.out.println("Classic");
+                            break;
                         case "FL":
                             System.out.println("Flex");
+                            break;
                         default:
                             System.err.println("N/A");
                             break;
@@ -239,7 +344,7 @@ public class Main {
     public static String formatDuration(String isoDuration){
         Duration duration = Duration.parse(isoDuration);
         Long hours = duration.toHours();
-        Long minutes = duration.toMinutes();
+        Long minutes = duration.toMinutes() %60;
 
         return hours + " H " + minutes + " Min";
     }
@@ -262,78 +367,149 @@ public class Main {
         return null;
     }
     public static void extrairPromo_BD(List<Transferencia_Boni> transferencias, List<Compra_Boni> compras, List<Adesao_Boni> adesoes){
+        
+        System.out.println("[SISTEMA] extraindo dados credenciais de acesso ao Banco de dados");
+        // Extraindo variaveis de ambiente
+        Dotenv dotenv = Dotenv.load();
+        String USUARIO = dotenv.get("USER");
+        String SENHA = dotenv.get("PASSWORD");
+
+        System.out.println("[SISTEMA] construindo ponto de acesso...");
+        // criando url de conexão ao Banco_da_Millie por meio do app Tailscale;
+        String url = "jdbc:mariadb://100.79.171.116:3306/Banco_da_Millie?user=java_user&password=50BMG";
+       
+        System.out.println("[SISTEMA] extraindo dados de promoção no banco de dados Millie, promoções...");
+        // Extraindo dados da tabela de promoções de transferência bonificada do banco de dados
+        String sql ="""
+            select * from Verificar_Transferencia_Boni;
+        """;
+
+        System.out.println("[SISTEMA] extraindo dados de transferencias bonificadas");
+        try (Connection conection = DriverManager.getConnection(url);
+            PreparedStatement stmt = conection.prepareStatement(sql);
+            ResultSet resultado = stmt.executeQuery()){
+                while (resultado.next()) {
+                    // Lê linha por linha até não haver mais linhas para ler
+                    int id = resultado.getInt("id");
+                    String link = resultado.getString("link");
+                    String origem = resultado.getString("plataforma_de_origem");
+                    String data_vencimento = resultado.getString("data_limite");
+                    double valor_milheiro_origem = resultado.getDouble("valor_milheiro_origem");
+                    String destino = resultado.getString("plataforma_de_destino");
+                    double percent_max = resultado.getDouble("percentual_MAX");
+                    double percent_min = resultado.getDouble("percentual_MIN");
+                    // cria o objeto dos dados extraidos para adicionar a lista
+                    Transferencia_Boni obj = new Transferencia_Boni(id,link,origem,destino,percent_min,percent_max,valor_milheiro_origem,data_vencimento);
+                    transferencias.add(obj);
+                }
+            System.out.println("[SISTEMA] Extração completa [1/3] \n" + "=".repeat(50));
+
+            } catch (Exception e) {
+            System.out.println("Erro ao extrair dados de transferência bonificada!! \n[ERRO] " + e);
+            }
+
+        sql = """
+            select * from Verificar_Compra_Boni;
+        """;
+        System.out.println("[SISTEMA] extraindo dados de compras bonificadas");
+        try (Connection conection = DriverManager.getConnection(url);
+            PreparedStatement stmt = conection.prepareStatement(sql);
+            ResultSet resultado = stmt.executeQuery()){
+                while (resultado.next()) {
+                    // Lê linha por linha até não haver mais linhas para ler
+                    int id = resultado.getInt("id");
+                    String link = resultado.getString("link");
+                    String origem = resultado.getString("plataforma_de_origem");
+                    String data_vencimento = resultado.getString("data_limite");
+                    double valor_milheiro_agencia = resultado.getDouble("valor_milheiro_agencia");
+                    double percent_max = resultado.getDouble("percentual_MAX");
+                    double percent_min = resultado.getDouble("percentual_MIN");
+                    // cria o objeto dos dados extraidos para adicionar a lista
+                    Compra_Boni obj = new Compra_Boni(id,link, origem, percent_min, percent_max, valor_milheiro_agencia,  data_vencimento);
+                    compras.add(obj);
+                }
+            System.out.println("[SISTEMA] Extração completa [2/3] \n" + "=".repeat(50));
+
+        } catch (Exception e) {
+            System.out.println("Erro ao extrair dados de compra bonificada!! \n[ERRO] " + e);
+        }
+        sql = """
+            select * from Verificar_Adesao_Boni;
+        """;
+
+        System.out.println("[SISTEMA] extraindo dados de adesões bonificadas");
+        try (Connection conection = DriverManager.getConnection(url);
+            PreparedStatement stmt = conection.prepareStatement(sql);
+            ResultSet resultado = stmt.executeQuery()){
+                while (resultado.next()) {
+                    // Lê linha por linha até não haver mais linhas para ler
+                    int id = resultado.getInt("id");
+                    String link = resultado.getString("link");
+                    String origem = resultado.getString("plataforma_de_origem");
+                    String data_vencimento = resultado.getString("data_limite");
+                    double valor_milheiro_origem = resultado.getDouble("valor_milheiro_origem");
+                    int quantidade_milhas = resultado.getInt("quantidade_milhas");
+                    // cria o objeto dos dados extraidos para adicionar a lista
+                    Adesao_Boni obj = new Adesao_Boni(id, link, origem, quantidade_milhas,  data_vencimento);
+                    adesoes.add(obj);
+                }
+            System.out.println("[SISTEMA] Extração completa [3/3] \n" + "=".repeat(50));
+
+        } catch (Exception e) {
+            System.out.println("Erro ao extrair dados de adesão bonificada!! \n[ERRO] " + e);
+        }
+            
+        
+    }
+    public static List<Cotacao> extrairCota_BD(){
+        List<Cotacao> cotacoes = new ArrayList<>();
+
+        // Extraindo variaveis de ambiente
         Dotenv dotenv = Dotenv.load();
         String USUARIO = dotenv.get("USER");
         String SENHA = dotenv.get("PASSWORD");
 
         // criando url de conexão ao Banco_da_Millie por meio do app Tailscale;
-        String url = "jdbc:mariadb://" + HOST_TAILSCALE + ":" + PORTA + "/" + BANCO;
+        String url = "jdbc:mariadb://100.79.171.116:3306/Banco_da_Millie?user=java_user&password=50BMG";
         // Extraindo dados da tabela de promoções de transferência bonificada do banco de dados
         String sql ="""
-            SELECT * FROM VERIFICAR_TRANSFERENCIA_BONI;
+            SELECT * from cotacoes;
         """;
 
-        try (Connection conection = DriverManager.getConnection(url,USUARIO,SENHA);
+        try (Connection conection = DriverManager.getConnection(url);
             PreparedStatement stmt = conection.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery()){
-                while (rs.next()) {
+            ResultSet resultado = stmt.executeQuery()){
+                while (resultado.next()) {
                     // Lê linha por linha até não haver mais linhas para ler
-                    int id = rs.getInt("id_promocoes");
-                    String origem = rs.getString("plataforma_de_origem");
-                    String destino = rs.getString("plataforma_de_destino");
-                    double percent_min = rs.getDouble("percentual_MIN");
-                    double percent_max = rs.getDouble("percentual_MAX");
-                    double valor_milheiro_agencia = rs.getDouble("valor_milheiro_agencia");
-                    String data_vencimento = rs.getString("data_limite");
+                    int id = resultado.getInt("id");
+                    String plataforma = resultado.getString("plataforma");
+                    String agencia = resultado.getString("agencia");
+                    double valor_min = resultado.getDouble("valor_min");
+                    double valor_max = resultado.getDouble("valor_max");
                     // cria o objeto dos dados extraidos para adicionar a lista
-                    Transferencia_Boni obj = new Transferencia_Boni(id,origem,destino,percent_min,percent_max,valor_milheiro_agencia,data_vencimento);
-                    transferencias.add(obj);
+                    Cotacao obj = new Cotacao(id, plataforma, agencia, valor_min, valor_max);
+                    cotacoes.add(obj);
                 }
         } catch (Exception e) {
-            System.out.println("Erro ao extrair dados de transferência bonificada!! \n[ERRO] " + e);
-            // TODO: handle exception
+            System.out.println("Erro ao extrair dados de cotações de milhas!! \n[ERRO] " + e);
         }
-        sql = """
-            SELECT * FROM VERIFICAR_COMPRA_BONI;
-        """;
-        try (Connection conection = DriverManager.getConnection(url,USUARIO,SENHA);
-            PreparedStatement stmt = conection.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery()){
-                while (rs.next()) {
-                    // Lê linha por linha até não haver mais linhas para ler
-                    int id = rs.getInt("id_promocoes");
-                    String origem = rs.getString("plataforma_de_origem");
-                    double percent_min = rs.getDouble("percentual_MIN");
-                    double percent_max = rs.getDouble("percentual_MAX");
-                    double valor_milheiro_agencia = rs.getDouble("valor_milheiro_agencia");
-                    String data_vencimento = rs.getString("data_limite");
-                    // cria o objeto dos dados extraidos para adicionar a lista
-                    Compra_Boni obj = new Compra_Boni(id, origem, percent_min, percent_max, valor_milheiro_agencia,  data_vencimento);
-                    compras.add(obj);
-                }
-        } catch (Exception e) {
-            System.out.println("Erro ao extrair dados de transferência bonificada!! \n[ERRO] " + e);
-        }
-        sql = """
-            SELECT * FROM VERIFICAR_ADESAO_BONI;
-        """;
-        try (Connection conection = DriverManager.getConnection(url,USUARIO,SENHA);
-            PreparedStatement stmt = conection.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery()){
-                while (rs.next()) {
-                    // Lê linha por linha até não haver mais linhas para ler
-                    int id = rs.getInt("id_promocoes");
-                    String origem = rs.getString("plataforma_de_origem");
-                    int qtd_milhas = rs.getInt("qtd_milhas");
-                    String data_vencimento = rs.getString("data_limite");
-                    // cria o objeto dos dados extraidos para adicionar a lista
-                    Adesao_Boni obj = new Adesao_Boni(id, origem, qtd_milhas,  data_vencimento);
-                    adesoes.add(obj);
-                }
-        } catch (Exception e) {
-            System.out.println("Erro ao extrair dados de transferência bonificada!! \n[ERRO] " + e);
-        }
-            
-        
+        return cotacoes;
     }
+    private static boolean avaliarOpcao(String nomeOpcao, double preco_passagem, double preco_passagem_milhas, double milheiro_Opcao) {
+        double preco_milheiro_passagem = (preco_passagem/preco_passagem_milhas)*1000.0;
+        double custo_opcao = (preco_passagem_milhas/1000.0) * milheiro_Opcao;
+        
+        // Nota: Se o objetivo é gastar MENOS, a opção é recomendada quando custoOpcao < custoReferencia.
+        // Mantive a lógica original (<), mas verifique se o sinal não deveria ser invertido (>).
+        boolean recomendada = custo_opcao < preco_passagem;
+        String status = recomendada ? "Opção recomendada" : "Opção não recomendada";
+
+        System.out.printf("%s - %s%n\n", nomeOpcao, status);
+        System.out.printf("Valor referência do milheiro na passagem %.2fn\n", preco_milheiro_passagem);
+        System.out.printf("Valor utilizando %s do milheiro na passagem %.2fn\n", nomeOpcao, milheiro_Opcao);
+        System.out.printf("Custo opcao %s = %.2f  |  Custo de referência = %.2f\n", nomeOpcao, custo_opcao, preco_passagem);
+        System.out.println("=".repeat(50));
+        return recomendada;
+    }
+
 }
