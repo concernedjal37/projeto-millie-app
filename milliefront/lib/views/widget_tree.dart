@@ -7,14 +7,16 @@ import 'package:milliefront/views/pages/perfil_config.dart';
 import 'package:milliefront/views/pages/login.dart';
 import 'package:milliefront/views/pages/perfil.dart';
 import 'package:milliefront/views/pages/configuracoes.dart';
-import 'package:milliefront/views/pages/promocao_e_cotacao.dart';
+import 'package:milliefront/views/pages/promocao.dart';
+import 'package:milliefront/views/pages/cotacao.dart';
 import 'package:milliefront/views/pages/voos.dart';
 import 'package:milliefront/views/widgets/navbar_widget.dart';
 
 List<Widget> pages = [
   HomePage(),
   Voos(),
-  PromocaoECotacao(),
+  Promocao(),
+  Cotacao(),
   Login(),
   Perfil(),
   Configuracoes(),

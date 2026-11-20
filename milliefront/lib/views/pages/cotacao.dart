@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
-class PromocaoECotacao extends StatefulWidget {
-  const PromocaoECotacao({super.key});
+class Cotacao extends StatefulWidget {
+  const Cotacao({super.key});
   @override
   // ignore: library_private_types_in_public_api
-  _PromocaoECotacaoState createState() => _PromocaoECotacaoState();
+  _CotacaoState createState() => _CotacaoState();
 }
 
-class _PromocaoECotacaoState extends State<StatefulWidget> {
-  String? menuItem = 'pro';
-  String? pesquisaProCot = '';
+class _CotacaoState extends State<StatefulWidget> {
+  String? pesquisaPro = '';
   TextEditingController controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -50,23 +49,14 @@ class _PromocaoECotacaoState extends State<StatefulWidget> {
                                 width: 450,
                               ),
                             ),
-                            DropdownButton(
-                              value: menuItem,
-                              items: [
-                                DropdownMenuItem(
-                                  value: 'pro',
-                                  child: Text('Promoções'),
+                            SizedBox(
+                              child: Text(
+                                "Pesquisa de cotações",
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  color: Colors.white,
                                 ),
-                                DropdownMenuItem(
-                                  value: 'cot',
-                                  child: Text('Cotações'),
-                                ),
-                              ],
-                              onChanged: (String? value) {
-                                setState(() {
-                                  menuItem = value;
-                                });
-                              },
+                              ),
                             ),
                             TextField(
                               controller: controller,
@@ -80,7 +70,7 @@ class _PromocaoECotacaoState extends State<StatefulWidget> {
                               ),
                               onEditingComplete: () {
                                 setState(() {
-                                  pesquisaProCot = controller.text;
+                                  pesquisaPro = controller.text;
                                 });
                               },
                             ),

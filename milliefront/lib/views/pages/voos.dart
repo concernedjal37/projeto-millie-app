@@ -14,7 +14,11 @@ class _VoosState extends State<StatefulWidget> {
   String? dataIda = '';
   String? dataVolta = '';
   String? nPassageiro = '';
-  TextEditingController controller = TextEditingController();
+  TextEditingController controllerIda = TextEditingController();
+  TextEditingController controllerVolta = TextEditingController();
+  TextEditingController controllerDataIda = TextEditingController();
+  TextEditingController controllerDataVolta = TextEditingController();
+  TextEditingController controllerPass = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -68,10 +72,10 @@ class _VoosState extends State<StatefulWidget> {
                               },
                             ),
                             TextField(
-                              controller: controller,
+                              controller: controllerIda,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
-                                hintText: 'Local de partida:',
+                                hintText: 'Código do local de partida:',
                                 hintStyle: TextStyle(
                                   color: Color(0xd0ffffff),
                                   fontSize: 18.0,
@@ -79,15 +83,15 @@ class _VoosState extends State<StatefulWidget> {
                               ),
                               onEditingComplete: () {
                                 setState(() {
-                                  vooIda = controller.text;
+                                  vooIda = controllerIda.text;
                                 });
                               },
                             ),
                             TextField(
-                              controller: controller,
+                              controller: controllerVolta,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
-                                hintText: 'Local do destino:',
+                                hintText: 'Código do local do destino:',
                                 hintStyle: TextStyle(
                                   color: Color(0xd0ffffff),
                                   fontSize: 18.0,
@@ -95,12 +99,12 @@ class _VoosState extends State<StatefulWidget> {
                               ),
                               onEditingComplete: () {
                                 setState(() {
-                                  vooVolta = controller.text;
+                                  vooVolta = controllerVolta.text;
                                 });
                               },
                             ),
                             TextField(
-                              controller: controller,
+                              controller: controllerDataIda,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
                                 hintText: 'Data da ida:',
@@ -111,12 +115,12 @@ class _VoosState extends State<StatefulWidget> {
                               ),
                               onEditingComplete: () {
                                 setState(() {
-                                  dataIda = controller.text;
+                                  dataIda = controllerDataIda.text;
                                 });
                               },
                             ),
                             TextField(
-                              controller: controller,
+                              controller: controllerDataVolta,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
                                 hintText: 'Data da volta:',
@@ -127,12 +131,12 @@ class _VoosState extends State<StatefulWidget> {
                               ),
                               onEditingComplete: () {
                                 setState(() {
-                                  dataVolta = controller.text;
+                                  dataVolta = controllerDataVolta.text;
                                 });
                               },
                             ),
                             TextField(
-                              controller: controller,
+                              controller: controllerPass,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
                                 hintText: 'Número de passageiros:',
@@ -143,7 +147,7 @@ class _VoosState extends State<StatefulWidget> {
                               ),
                               onEditingComplete: () {
                                 setState(() {
-                                  nPassageiro = controller.text;
+                                  nPassageiro = controllerPass.text;
                                 });
                               },
                             ),

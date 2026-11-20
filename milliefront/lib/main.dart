@@ -14,11 +14,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Millie Arthur',
-      theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: WidgetTree()
+      theme: ThemeData(colorScheme: Theme.of(context).colorScheme),
+      home: WidgetTree(),
     );
   }
 }
-

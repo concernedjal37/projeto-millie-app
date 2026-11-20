@@ -15,7 +15,11 @@ class NavbarWidget extends StatelessWidget {
             NavigationDestination(icon: Icon(Icons.flight), label: 'Voos'),
             NavigationDestination(
               icon: Icon(Icons.monetization_on),
-              label: 'Promoções e Cotações',
+              label: 'Promoções',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.monetization_on),
+              label: 'Cotações',
             ),
           ],
           onDestinationSelected: (int value) {

@@ -9,9 +9,10 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<StatefulWidget> {
-  var _nomeUsuario = "";
-  var _senha = "";
-  TextEditingController controller = TextEditingController();
+  var nomeUsuario = '';
+  var senha = '';
+  TextEditingController controllerNome = TextEditingController();
+  TextEditingController controllerSenha = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,11 +44,11 @@ class _LoginState extends State<StatefulWidget> {
                   ),
                 ),
                 TextField(
-                  controller: controller,
+                  controller: controllerNome,
                   decoration: InputDecoration(border: OutlineInputBorder()),
                   onEditingComplete: () {
                     setState(() {
-                      _nomeUsuario = controller.text;
+                      nomeUsuario = controllerNome.text;
                     });
                   },
                 ),
@@ -58,11 +59,11 @@ class _LoginState extends State<StatefulWidget> {
                   ),
                 ),
                 TextField(
-                  controller: controller,
+                  controller: controllerSenha,
                   decoration: InputDecoration(border: OutlineInputBorder()),
                   onEditingComplete: () {
                     setState(() {
-                      _senha = controller.text;
+                      senha = controllerSenha.text;
                     });
                   },
                 ),
