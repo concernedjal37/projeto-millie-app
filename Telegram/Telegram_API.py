@@ -47,6 +47,7 @@ from telethon import TelegramClient, events
 from telethon import utils
 from typing import Type, TypeVar
 from pydantic import BaseModel
+from datetime import datetime
 import Objetos
 import threading
 import mariadb
@@ -259,6 +260,26 @@ def Salvar_Promocao_BD(promocao: any):
         if 'connection' in locals():
             connection.close()
 
+#função para apagar e verificar as promoções se necessario
+def verificarPromocoes(horarioAtual: datetime):
+    try:
+        connection = mariadb.connect(
+                    host="100.79.171.116",
+                    port=3306,
+                    database="Banco_da_Millie",
+                    user="java_user",
+                    password="50BMG"
+                )
+        cursor = connection.cursor()
+        sql = "call Verificar_promos(%s)"
+        cursor.execute(sql, (horarioAtual))
+        connection.commit()
+        #Essa parte será alterada depois para melhor tratamento de erros
+    except mariadb.Error as e:
+        print("Algo deu errado na operação de verificação")
+    finally:
+        if 'connection' in locals():
+            connection.close()
 
 """Essa função Executa todos os trabalhos necessários para extração de dados do Telegram seja para testes ou execução 24/7
 Função é executada apenas quando a thread responsável é ativada "start" digitado no terminal"""
@@ -505,6 +526,8 @@ async def executar_trabalho(Telegram_Client):
                 else:
                     print(
                         "[SISTEMA] Mensagem recebida, mas não corresponde a nenhuma categoria conhecida.")
+            #chamar a função aqui
+                verificarPromocoes(datetime.now())
 
             # Chat pessoal para testes dentro do fluxo 24/7
             # CHAT PESSOAL EXCLUSIVO PARA TESTES
